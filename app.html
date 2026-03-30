@@ -1,0 +1,3309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f3ff">
+<title>Shabbat TV</title>
+<link rel="manifest" href="/manifest.json">
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#f5f3ff;
+  --bg2:#ede9fe;
+  --card:#ffffff;
+  --card-hover:#faf8ff;
+  --text:#1e1b4b;
+  --text2:#6366f1;
+  --text3:#a5a3c7;
+  --text4:#c4c1e0;
+  --accent:#7c3aed;
+  --accent2:#8b5cf6;
+  --accent3:#a78bfa;
+  --accent-soft:rgba(124,58,237,0.08);
+  --accent-medium:rgba(124,58,237,0.15);
+  --gradient:linear-gradient(135deg,#7c3aed 0%,#6366f1 40%,#818cf8 100%);
+  --gradient-warm:linear-gradient(135deg,#f59e0b 0%,#f97316 100%);
+  --gradient-cool:linear-gradient(135deg,#06b6d4 0%,#3b82f6 100%);
+  --gradient-rose:linear-gradient(135deg,#f43f5e 0%,#ec4899 100%);
+  --gradient-green:linear-gradient(135deg,#10b981 0%,#059669 100%);
+  --success:#10b981;
+  --success-bg:rgba(16,185,129,0.1);
+  --danger:#ef4444;
+  --danger-bg:rgba(239,68,68,0.08);
+  --warning:#f59e0b;
+  --shadow-sm:0 1px 3px rgba(124,58,237,0.04);
+  --shadow:0 4px 20px rgba(124,58,237,0.06);
+  --shadow-lg:0 12px 40px rgba(124,58,237,0.1);
+  --shadow-xl:0 20px 60px rgba(124,58,237,0.14);
+  --radius:24px;
+  --radius-md:18px;
+  --radius-sm:14px;
+  --radius-xs:10px;
+  --ease:cubic-bezier(0.4, 0, 0.2, 1);
+  --spring:cubic-bezier(0.34, 1.56, 0.64, 1);
+  --bounce:cubic-bezier(0.68, -0.6, 0.32, 1.6);
+}
+
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ═══ Animated background blobs ═══ */
+.bg-blobs{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+}
+.blob{
+  position:absolute;border-radius:50%;
+  filter:blur(80px);opacity:0.35;
+  animation:float 20s ease-in-out infinite;
+}
+.blob-1{
+  width:300px;height:300px;
+  background:#c4b5fd;
+  top:-80px;right:-60px;
+  animation-delay:0s;
+}
+.blob-2{
+  width:250px;height:250px;
+  background:#93c5fd;
+  bottom:10%;left:-80px;
+  animation-delay:-7s;
+}
+.blob-3{
+  width:200px;height:200px;
+  background:#fda4af;
+  top:40%;right:-40px;
+  animation-delay:-13s;
+}
+
+@keyframes float{
+  0%,100%{transform:translate(0,0) scale(1)}
+  25%{transform:translate(30px,-40px) scale(1.1)}
+  50%{transform:translate(-20px,30px) scale(0.95)}
+  75%{transform:translate(40px,20px) scale(1.05)}
+}
+
+/* ═══ Header ═══ */
+.header{
+  position:sticky;top:0;z-index:100;
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(245,243,255,0.72);
+  backdrop-filter:blur(24px) saturate(1.8);
+  -webkit-backdrop-filter:blur(24px) saturate(1.8);
+  border-bottom:1px solid rgba(139,92,246,0.08);
+}
+
+.logo{display:flex;align-items:center;gap:10px}
+
+.logo-icon{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:19px;
+  box-shadow:0 4px 16px rgba(124,58,237,0.25);
+  animation:logo-breathe 4s ease-in-out infinite;
+}
+
+@keyframes logo-breathe{
+  0%,100%{box-shadow:0 4px 16px rgba(124,58,237,0.25)}
+  50%{box-shadow:0 4px 24px rgba(124,58,237,0.4)}
+}
+
+.logo h1{font-size:19px;font-weight:800;letter-spacing:-0.4px;color:var(--text)}
+
+.header-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;
+  background:var(--card);
+  border:1px solid rgba(139,92,246,0.1);
+  box-shadow:var(--shadow-sm);
+}
+
+.header-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--success);
+  box-shadow:0 0 8px rgba(16,185,129,0.5);
+  animation:pulse-dot 2s infinite;
+}
+
+.header-dot.off{background:var(--danger);box-shadow:0 0 8px rgba(239,68,68,0.5);animation:none}
+
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.85)}}
+
+.header-label{font-size:11px;font-weight:600;color:var(--text3)}
+
+/* ═══ Main ═══ */
+.main{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:6px 16px 120px}
+
+/* ═══ Hero Card ═══ */
+.hero{
+  position:relative;
+  margin:10px 0 24px;
+  padding:30px 26px 26px;
+  border-radius:var(--radius);
+  background:var(--gradient);
+  color:#fff;
+  overflow:hidden;
+  box-shadow:0 12px 40px rgba(124,58,237,0.3);
+  animation:hero-in 0.8s var(--spring) both;
+}
+
+@keyframes hero-in{
+  from{opacity:0;transform:translateY(20px) scale(0.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.hero::before{
+  content:'';position:absolute;
+  top:-60%;right:-20%;
+  width:280px;height:280px;border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  animation:hero-orb 15s ease-in-out infinite;
+}
+
+.hero::after{
+  content:'';position:absolute;
+  bottom:-40%;left:-10%;
+  width:200px;height:200px;border-radius:50%;
+  background:rgba(255,255,255,0.05);
+  animation:hero-orb 18s ease-in-out infinite reverse;
+}
+
+@keyframes hero-orb{
+  0%,100%{transform:translate(0,0)}
+  50%{transform:translate(30px,20px)}
+}
+
+.hero-inner{position:relative;z-index:1}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;
+  opacity:0.85;margin-bottom:6px;
+  letter-spacing:0.3px;
+}
+
+.hero-title{
+  font-size:30px;font-weight:900;
+  letter-spacing:-0.8px;line-height:1.1;
+  margin-bottom:20px;
+}
+
+.hero-row{display:flex;gap:24px}
+
+.hero-time{display:flex;flex-direction:column;gap:1px}
+
+.hero-time small{
+  font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1px;
+  opacity:0.65;
+}
+
+.hero-time span{
+  font-size:26px;font-weight:800;
+  letter-spacing:-0.8px;
+  font-variant-numeric:tabular-nums;
+}
+
+.hero-countdown{
+  margin-top:18px;
+  padding:10px 18px;
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(8px);
+  border-radius:14px;
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:600;
+}
+
+.hero-countdown .timer{
+  font-variant-numeric:tabular-nums;
+  font-weight:800;
+}
+
+.hero-badge-active{
+  margin-top:18px;
+  padding:10px 18px;
+  background:rgba(255,255,255,0.18);
+  backdrop-filter:blur(8px);
+  border-radius:14px;
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:700;
+  animation:badge-glow 2s ease-in-out infinite;
+}
+
+@keyframes badge-glow{
+  0%,100%{background:rgba(255,255,255,0.18)}
+  50%{background:rgba(255,255,255,0.28)}
+}
+
+.badge-live{
+  width:8px;height:8px;border-radius:50%;
+  background:#fff;
+  animation:pulse-dot 1.5s infinite;
+}
+
+/* ═══ Section ═══ */
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:0 0 14px 2px;
+}
+
+.section-title{
+  font-size:13px;font-weight:700;
+  color:var(--text3);
+  text-transform:uppercase;letter-spacing:0.8px;
+}
+
+/* ═══ Device Card ═══ */
+.device-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:22px;
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(139,92,246,0.06);
+  transition:all 0.35s var(--ease);
+  animation:card-in 0.6s var(--spring) both;
+  position:relative;overflow:hidden;
+}
+
+.device-card:nth-child(1){animation-delay:0.1s}
+.device-card:nth-child(2){animation-delay:0.2s}
+.device-card:nth-child(3){animation-delay:0.3s}
+
+@keyframes card-in{
+  from{opacity:0;transform:translateY(24px) scale(0.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.device-card.active{
+  border-color:rgba(124,58,237,0.15);
+  box-shadow:var(--shadow-lg),0 0 0 1px rgba(124,58,237,0.08);
+}
+
+/* Shimmer on active card */
+.device-card.active::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg, transparent 40%, rgba(124,58,237,0.03) 50%, transparent 60%);
+  background-size:200% 100%;
+  animation:shimmer 3s infinite;
+}
+
+@keyframes shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+.dev-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;position:relative;z-index:1;
+}
+
+.dev-left{display:flex;align-items:center;gap:14px}
+
+.dev-avatar{
+  width:50px;height:50px;
+  border-radius:16px;
+  background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  transition:all 0.4s var(--spring);
+}
+
+.device-card.active .dev-avatar{
+  background:var(--gradient);
+  box-shadow:0 6px 20px rgba(124,58,237,0.3);
+  transform:scale(1.05);
+}
+
+.device-card.active .dev-avatar span{filter:brightness(10)}
+
+.dev-name{font-size:16px;font-weight:700;letter-spacing:-0.2px}
+
+.dev-subtitle{
+  font-size:12px;color:var(--text3);
+  margin-top:2px;display:flex;align-items:center;gap:5px;
+}
+
+/* Big toggle */
+.big-toggle{
+  position:relative;width:58px;height:32px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+
+.big-toggle input{position:absolute;opacity:0;width:0;height:0}
+
+.big-toggle .track{
+  position:absolute;inset:0;
+  border-radius:16px;
+  background:#e2e0f0;
+  transition:all 0.4s var(--ease);
+  border:1px solid rgba(0,0,0,0.04);
+}
+
+.big-toggle .thumb{
+  position:absolute;width:26px;height:26px;
+  top:3px;left:3px;
+  border-radius:50%;background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,0.12);
+  transition:all 0.4s var(--spring);
+}
+
+.big-toggle input:checked~.track{
+  background:var(--gradient);
+  border-color:transparent;
+  box-shadow:0 4px 16px rgba(124,58,237,0.3);
+}
+
+.big-toggle input:checked~.thumb{
+  left:29px;
+  box-shadow:0 2px 12px rgba(124,58,237,0.3);
+}
+
+/* Status bar in device card */
+.dev-status{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  border-radius:var(--radius-xs);
+  font-size:12px;font-weight:600;
+  position:relative;z-index:1;
+  transition:all 0.3s var(--ease);
+}
+
+.dev-status.on{background:var(--success-bg);color:#059669}
+.dev-status.off{background:rgba(0,0,0,0.03);color:var(--text3)}
+.dev-status.error{background:var(--danger-bg);color:var(--danger)}
+
+.dev-status .dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+
+.dev-status.on .dot{background:var(--success);box-shadow:0 0 8px rgba(16,185,129,0.5);animation:pulse-dot 2s infinite}
+.dev-status.off .dot{background:var(--text4)}
+.dev-status.error .dot{background:var(--danger);box-shadow:0 0 8px rgba(239,68,68,0.4)}
+
+/* ═══ Bento Grid ═══ */
+.bento{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.bento-card{
+  background:var(--card);
+  border-radius:var(--radius-md);
+  padding:22px 18px;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(139,92,246,0.05);
+  cursor:pointer;
+  transition:all 0.3s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+  position:relative;overflow:hidden;
+  animation:card-in 0.6s var(--spring) both;
+}
+
+.bento-card:nth-child(1){animation-delay:0.3s}
+.bento-card:nth-child(2){animation-delay:0.4s}
+.bento-card:nth-child(3){animation-delay:0.5s}
+.bento-card:nth-child(4){animation-delay:0.6s}
+
+.bento-card:active{
+  transform:scale(0.96);
+  box-shadow:var(--shadow-lg);
+}
+
+.bento-icon{
+  width:44px;height:44px;
+  border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;
+  margin-bottom:14px;
+  transition:transform 0.4s var(--spring);
+}
+
+.bento-card:active .bento-icon{transform:scale(1.1) rotate(-4deg)}
+
+.bento-icon.i-add{background:var(--gradient)}
+.bento-icon.i-auto{background:var(--gradient-cool)}
+.bento-icon.i-stats{background:var(--gradient-rose)}
+.bento-icon.i-city{background:var(--gradient-warm)}
+
+.bento-title{font-size:15px;font-weight:700;letter-spacing:-0.2px}
+.bento-desc{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.45}
+
+/* ═══ Bottom Sheet ═══ */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(30,27,75,0.25);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.3s;
+}
+
+.overlay.open{opacity:1;pointer-events:auto}
+
+.sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:201;
+  background:var(--card);
+  border-radius:var(--radius) var(--radius) 0 0;
+  box-shadow:var(--shadow-xl);
+  max-height:85dvh;overflow-y:auto;
+  transform:translateY(100%);
+  transition:transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  padding:8px 20px 36px;
+  overscroll-behavior:contain;
+}
+
+.sheet.open{transform:translateY(0)}
+
+.sheet-bar{
+  width:40px;height:4px;
+  background:var(--bg2);border-radius:2px;
+  margin:4px auto 20px;
+}
+
+.sheet-title{
+  font-size:22px;font-weight:800;
+  letter-spacing:-0.4px;margin-bottom:20px;
+}
+
+/* Sheet: add device */
+.scan-step{
+  text-align:center;
+  padding:20px 0;
+}
+
+.scan-anim{
+  width:120px;height:120px;
+  margin:0 auto 20px;
+  position:relative;
+}
+
+.scan-ring{
+  position:absolute;inset:0;
+  border-radius:50%;
+  border:3px solid var(--accent-medium);
+  animation:scan-expand 2s ease-out infinite;
+}
+
+.scan-ring:nth-child(2){animation-delay:0.5s}
+.scan-ring:nth-child(3){animation-delay:1s}
+
+@keyframes scan-expand{
+  0%{transform:scale(0.3);opacity:0.8}
+  100%{transform:scale(1.2);opacity:0}
+}
+
+.scan-center{
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:50px;height:50px;
+  border-radius:50%;
+  background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  box-shadow:0 6px 24px rgba(124,58,237,0.35);
+}
+
+.scan-text{font-size:15px;font-weight:600;color:var(--text)}
+.scan-sub{font-size:13px;color:var(--text3);margin-top:4px}
+
+/* Found devices */
+.found-device{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  margin-bottom:10px;
+  border:1px solid rgba(139,92,246,0.06);
+  animation:card-in 0.4s var(--spring) both;
+}
+
+.found-device:nth-child(2){animation-delay:0.1s}
+.found-device:nth-child(3){animation-delay:0.2s}
+
+.found-left{display:flex;align-items:center;gap:12px}
+
+.found-avatar{
+  width:42px;height:42px;border-radius:12px;
+  background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+
+.found-name{font-size:14px;font-weight:600}
+.found-meta{font-size:11px;color:var(--text3);margin-top:1px}
+
+.chip{
+  padding:6px 14px;border-radius:20px;
+  font-size:11px;font-weight:700;
+  border:none;cursor:pointer;
+  font-family:inherit;
+  transition:all 0.2s var(--ease);
+}
+
+.chip-paired{background:var(--success-bg);color:#059669}
+.chip-add{background:var(--gradient);color:#fff;box-shadow:0 3px 12px rgba(124,58,237,0.25)}
+.chip-add:active{transform:scale(0.94)}
+
+/* Sheet: programme */
+.auto-option{
+  padding:18px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border:1.5px solid transparent;
+  cursor:pointer;
+  transition:all 0.25s var(--ease);
+}
+
+.auto-option.selected{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  box-shadow:0 0 0 3px rgba(124,58,237,0.08);
+}
+
+.auto-option-left{display:flex;align-items:center;gap:12px}
+
+.auto-option-icon{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+
+.auto-option h4{font-size:14px;font-weight:600}
+.auto-option p{font-size:12px;color:var(--text3);margin-top:2px}
+
+.auto-radio{
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid var(--text4);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s var(--spring);
+}
+
+.auto-option.selected .auto-radio{
+  border-color:var(--accent);
+  background:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-medium);
+}
+
+.auto-option.selected .auto-radio::after{
+  content:'';width:8px;height:8px;
+  border-radius:50%;background:#fff;
+}
+
+/* Sheet: stats */
+.stat-card{
+  background:var(--bg);border-radius:var(--radius-sm);
+  padding:20px;margin-bottom:10px;
+  text-align:center;
+}
+
+.stat-big{
+  font-size:36px;font-weight:900;
+  letter-spacing:-1px;
+  background:var(--gradient);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.stat-label{font-size:12px;font-weight:600;color:var(--text3);margin-top:2px}
+
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+
+/* Sheet: city */
+.city-current{
+  padding:18px;
+  background:var(--accent-soft);
+  border-radius:var(--radius-sm);
+  border:1px solid var(--accent-medium);
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;
+}
+
+.city-icon{font-size:28px}
+.city-name{font-size:16px;font-weight:700}
+.city-sub{font-size:12px;color:var(--text3)}
+
+/* Button */
+.btn{
+  width:100%;padding:16px;
+  border:none;border-radius:var(--radius-sm);
+  font-family:inherit;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all 0.25s var(--ease);
+  letter-spacing:-0.1px;
+}
+
+.btn-primary{
+  background:var(--gradient);color:#fff;
+  box-shadow:0 6px 24px rgba(124,58,237,0.3);
+}
+
+.btn-primary:active{transform:scale(0.97);box-shadow:0 3px 12px rgba(124,58,237,0.2)}
+
+.btn-soft{
+  background:var(--bg);color:var(--text);margin-top:8px;
+}
+
+/* ═══ Toast ═══ */
+.toast-wrap{
+  position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:300;
+}
+
+.toast{
+  padding:10px 22px;
+  background:var(--card);
+  border:1px solid rgba(139,92,246,0.1);
+  border-radius:14px;
+  box-shadow:var(--shadow-lg);
+  font-size:13px;font-weight:600;
+  opacity:0;transform:translateY(-12px) scale(0.95);
+  transition:all 0.35s var(--spring);
+  white-space:nowrap;
+}
+
+.toast.show{opacity:1;transform:translateY(0) scale(1)}
+
+/* ═══ Skeleton ═══ */
+.skel{
+  background:linear-gradient(90deg, var(--bg2) 25%, #e9e5fc 50%, var(--bg2) 75%);
+  background-size:200% 100%;
+  animation:skel-shimmer 1.5s infinite;
+  border-radius:var(--radius);
+}
+
+@keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.skel-hero{height:200px;margin:10px 0 24px}
+.skel-card{height:100px;margin-bottom:14px}
+
+/* ═══ Empty ═══ */
+.empty{text-align:center;padding:36px 20px}
+.empty-icon{font-size:44px;margin-bottom:14px}
+.empty h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.empty p{font-size:13px;color:var(--text3);line-height:1.5}
+
+/* History item */
+.history-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 16px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  margin-bottom:8px;
+  animation:card-in 0.4s var(--spring) both;
+}
+
+.history-item:nth-child(2){animation-delay:0.05s}
+.history-item:nth-child(3){animation-delay:0.1s}
+.history-item:nth-child(4){animation-delay:0.15s}
+
+.history-item h4{font-size:14px;font-weight:600}
+.history-item .date{font-size:12px;color:var(--text3);margin-top:2px}
+.history-times{font-size:13px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums}
+
+/* Animations on scroll */
+/* ═══ Google button ═══ */
+.google-btn{
+  width:100%;max-width:340px;
+  padding:16px 20px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid rgba(0,0,0,0.08);
+  background:#fff;
+  font-family:inherit;font-size:15px;font-weight:600;
+  color:#1e1b4b;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  cursor:pointer;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  transition:all 0.25s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+  min-height:52px;
+}
+
+.google-btn:active{transform:scale(0.97);box-shadow:0 1px 6px rgba(0,0,0,0.08)}
+
+.google-btn svg{flex-shrink:0}
+
+/* Mobile: make Google popup full-width bottom sheet */
+@media(max-width:500px){
+  .google-popup-overlay{
+    position:fixed;inset:0;z-index:600;
+    background:rgba(30,27,75,0.3);
+    backdrop-filter:blur(6px);
+    display:flex;align-items:flex-end;
+  }
+  .google-popup{
+    width:100%;
+    background:var(--card);
+    border-radius:var(--radius) var(--radius) 0 0;
+    padding:28px 24px 36px;
+    text-align:center;
+    box-shadow:var(--shadow-xl);
+    animation:sheet-up 0.35s cubic-bezier(0.32,0.72,0,1);
+  }
+  @keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+}
+
+.ob-divider{
+  display:flex;align-items:center;gap:14px;
+  margin:20px 0;
+  width:100%;max-width:340px;
+}
+
+.ob-divider::before,.ob-divider::after{
+  content:'';flex:1;height:1px;
+  background:rgba(139,92,246,0.1);
+}
+
+.ob-divider span{
+  font-size:12px;font-weight:600;
+  color:var(--text4);white-space:nowrap;
+}
+
+/* ═══ Choice cards (gender etc) ═══ */
+.ob-choice-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  width:100%;max-width:340px;
+}
+
+.ob-choice-card{
+  padding:24px 16px;
+  border-radius:var(--radius-md);
+  border:2px solid rgba(139,92,246,0.08);
+  background:var(--card);
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.3s var(--spring);
+  box-shadow:var(--shadow);
+}
+
+.ob-choice-card:active{transform:scale(0.96)}
+
+.ob-choice-card.selected{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  box-shadow:0 0 0 4px rgba(124,58,237,0.08), var(--shadow-lg);
+  transform:scale(1.02);
+}
+
+.ob-choice-icon{
+  font-size:48px;
+  margin-bottom:10px;
+  transition:transform 0.4s var(--spring);
+}
+
+.ob-choice-card.selected .ob-choice-icon{
+  transform:scale(1.15);
+}
+
+.ob-choice-label{
+  font-size:14px;color:var(--text3);
+  line-height:1.4;
+}
+
+.ob-choice-label strong{
+  color:var(--text);font-weight:700;
+}
+
+/* ═══ Ready check animation ═══ */
+.ob-ready-check{
+  animation:check-pop 0.6s var(--spring) both;
+}
+
+@keyframes check-pop{
+  from{opacity:0;transform:scale(0.5) rotate(-10deg)}
+  to{opacity:1;transform:scale(1) rotate(0)}
+}
+
+.check-path{
+  stroke-dasharray:50;
+  stroke-dashoffset:50;
+  animation:check-draw 0.6s 0.3s ease forwards;
+}
+
+@keyframes check-draw{to{stroke-dashoffset:0}}
+
+/* ═══ Avatar button ═══ */
+.avatar-btn{
+  width:38px;height:38px;
+  border-radius:50%;border:none;
+  background:var(--gradient);
+  color:#fff;font-family:inherit;
+  font-size:15px;font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 12px rgba(124,58,237,0.25);
+  transition:all 0.3s var(--spring);
+  -webkit-tap-highlight-color:transparent;
+  position:relative;overflow:hidden;
+}
+
+.avatar-btn:active{transform:scale(0.9)}
+
+.avatar-btn img{
+  width:100%;height:100%;
+  border-radius:50%;object-fit:cover;
+}
+
+/* ═══ Onboarding fullscreen ═══ */
+.onboarding{
+  position:fixed;inset:0;z-index:500;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:opacity 0.5s, transform 0.5s var(--ease);
+}
+
+.onboarding.hiding{
+  opacity:0;
+  transform:scale(1.05);
+  pointer-events:none;
+}
+
+.onboarding-hidden{display:none !important}
+
+.ob-slides{
+  flex:1;position:relative;overflow:hidden;
+}
+
+.ob-slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 32px;text-align:center;
+  transition:all 0.5s var(--ease);
+  opacity:0;transform:translateX(80px);
+  pointer-events:none;
+}
+
+.ob-slide.active{
+  opacity:1;transform:translateX(0);pointer-events:auto;
+}
+
+.ob-slide.exit-left{
+  opacity:0;transform:translateX(-80px);
+}
+
+.ob-illustration{
+  width:140px;height:140px;
+  border-radius:40px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:60px;
+  margin-bottom:32px;
+  animation:ob-float 4s ease-in-out infinite;
+}
+
+@keyframes ob-float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+
+.ob-illustration.purple{background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(99,102,241,0.08))}
+.ob-illustration.blue{background:linear-gradient(135deg,rgba(96,165,250,0.12),rgba(59,130,246,0.08))}
+.ob-illustration.green{background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(5,150,105,0.08))}
+
+.ob-title{
+  font-size:26px;font-weight:900;
+  letter-spacing:-0.6px;line-height:1.2;
+  margin-bottom:10px;
+}
+
+.ob-desc{
+  font-size:15px;color:var(--text3);
+  line-height:1.6;max-width:320px;
+}
+
+/* Onboarding form */
+.ob-form{
+  width:100%;max-width:340px;
+  text-align:left;
+}
+
+.ob-field{margin-bottom:16px}
+
+.ob-field label{
+  display:block;
+  font-size:12px;font-weight:700;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:6px;
+}
+
+.ob-input{
+  width:100%;padding:14px 18px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid rgba(139,92,246,0.12);
+  background:var(--card);
+  font-family:inherit;font-size:15px;
+  color:var(--text);outline:none;
+  transition:all 0.25s var(--ease);
+  box-shadow:var(--shadow-sm);
+}
+
+.ob-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-soft);
+}
+
+.ob-input::placeholder{color:var(--text4)}
+
+/* Onboarding bottom */
+.ob-bottom{
+  padding:20px 32px 36px;
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.ob-dots{
+  display:flex;justify-content:center;gap:8px;
+  margin-bottom:12px;
+}
+
+.ob-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--text4);
+  transition:all 0.4s var(--spring);
+}
+
+.ob-dot.active{
+  background:var(--accent);
+  width:24px;border-radius:4px;
+}
+
+.ob-btn{
+  width:100%;padding:16px;
+  border:none;border-radius:var(--radius-sm);
+  font-family:inherit;font-size:15px;font-weight:700;
+  cursor:pointer;letter-spacing:-0.1px;
+  transition:all 0.25s var(--ease);
+}
+
+.ob-btn-primary{
+  background:var(--gradient);color:#fff;
+  box-shadow:0 6px 24px rgba(124,58,237,0.3);
+}
+
+.ob-btn-primary:active{transform:scale(0.97)}
+
+.ob-btn-primary:disabled{
+  opacity:0.5;cursor:not-allowed;
+  transform:none;
+}
+
+.ob-btn-ghost{
+  background:transparent;color:var(--text3);
+}
+
+/* ═══ Profile sheet extras ═══ */
+.profile-header{
+  display:flex;flex-direction:column;align-items:center;
+  padding:10px 0 24px;
+}
+
+.profile-avatar-large{
+  width:80px;height:80px;
+  border-radius:50%;
+  background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:32px;font-weight:800;
+  margin-bottom:14px;
+  box-shadow:0 8px 30px rgba(124,58,237,0.3);
+}
+
+.profile-name{font-size:20px;font-weight:800;letter-spacing:-0.3px}
+.profile-email{font-size:13px;color:var(--text3);margin-top:2px}
+
+.profile-menu-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:all 0.2s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.profile-menu-item:active{background:var(--bg2)}
+
+.profile-menu-left{display:flex;align-items:center;gap:12px}
+
+.profile-menu-icon{
+  width:38px;height:38px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+}
+
+.profile-menu-item h4{font-size:14px;font-weight:600}
+.profile-menu-item p{font-size:11px;color:var(--text3);margin-top:1px}
+
+.profile-menu-arrow{
+  font-size:16px;color:var(--text4);
+  transition:transform 0.2s;
+}
+
+.profile-menu-item:active .profile-menu-arrow{transform:translateX(3px)}
+
+.logout-btn{
+  width:100%;padding:14px;margin-top:8px;
+  border:1.5px solid var(--danger-bg);
+  border-radius:var(--radius-sm);
+  background:transparent;
+  color:var(--danger);
+  font-family:inherit;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;
+}
+
+.logout-btn:active{background:var(--danger-bg)}
+
+/* ═══ Setup Wizard ═══ */
+.setup-wizard{
+  position:fixed;inset:0;z-index:400;
+  background:var(--bg);
+  overflow:hidden;
+  transition:opacity 0.5s, transform 0.5s var(--ease);
+}
+
+.setup-wizard.hiding{opacity:0;transform:scale(1.05);pointer-events:none}
+.setup-hidden{display:none !important}
+
+.setup-page{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:0;
+  opacity:0;transform:translateX(100%);
+  transition:all 0.5s var(--ease);
+  pointer-events:none;
+}
+
+.setup-page.active{
+  opacity:1;transform:translateX(0);pointer-events:auto;
+}
+
+.setup-page.exit-left{
+  opacity:0;transform:translateX(-40%);
+}
+
+.setup-top{
+  padding:60px 28px 20px;
+  text-align:center;
+}
+
+.setup-step-indicator{
+  display:inline-block;
+  padding:5px 14px;
+  border-radius:20px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-size:11px;font-weight:700;
+  margin-bottom:16px;
+  letter-spacing:0.3px;
+}
+
+.setup-title{
+  font-size:28px;font-weight:900;
+  letter-spacing:-0.6px;line-height:1.15;
+  margin-bottom:8px;
+}
+
+.setup-desc{
+  font-size:14px;color:var(--text3);
+  line-height:1.5;max-width:320px;margin:0 auto;
+}
+
+.setup-body{
+  flex:1;
+  padding:20px 28px;
+  overflow-y:auto;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+.setup-bottom{
+  padding:16px 28px 36px;
+  display:flex;flex-direction:column;gap:8px;
+}
+
+.setup-scan-status{
+  font-size:14px;font-weight:600;
+  color:var(--text3);
+  margin:16px 0;
+  text-align:center;
+  transition:all 0.3s;
+}
+
+/* Setup device cards */
+.setup-device{
+  width:100%;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;
+  background:var(--card);
+  border-radius:var(--radius-md);
+  margin-bottom:10px;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(139,92,246,0.06);
+  animation:card-in 0.5s var(--spring) both;
+}
+
+.setup-device:nth-child(2){animation-delay:0.1s}
+.setup-device:nth-child(3){animation-delay:0.2s}
+
+.setup-device-left{display:flex;align-items:center;gap:14px}
+
+.setup-device-icon{
+  width:46px;height:46px;border-radius:14px;
+  background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+}
+
+.setup-device-name{font-size:15px;font-weight:700}
+.setup-device-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* ═══ Scan selectable devices ═══ */
+.scan-device-selectable{
+  width:100%;
+  display:flex;align-items:center;gap:14px;
+  padding:18px 20px;
+  background:var(--card);
+  border-radius:var(--radius-md);
+  margin-bottom:10px;
+  box-shadow:var(--shadow);
+  border:2px solid transparent;
+  cursor:pointer;
+  transition:all 0.3s var(--spring);
+  -webkit-tap-highlight-color:transparent;
+  animation:card-in 0.5s var(--spring) both;
+}
+
+.scan-device-selectable:nth-child(2){animation-delay:0.1s}
+.scan-device-selectable:nth-child(3){animation-delay:0.15s}
+
+.scan-device-selectable:active{transform:scale(0.97)}
+
+.scan-device-selectable.selected{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  box-shadow:0 0 0 4px rgba(124,58,237,0.08), var(--shadow-lg);
+}
+
+.scan-device-selectable .check-circle{
+  width:24px;height:24px;
+  border-radius:50%;
+  border:2px solid var(--text4);
+  margin-left:auto;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s var(--spring);
+}
+
+.scan-device-selectable.selected .check-circle{
+  border-color:var(--accent);
+  background:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-medium);
+}
+
+.scan-device-selectable.selected .check-circle::after{
+  content:'';width:8px;height:8px;
+  border-radius:50%;background:#fff;
+}
+
+/* ═══ Pair card ═══ */
+.setup-pair-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:32px;
+  box-shadow:var(--shadow-lg);
+  text-align:center;
+  width:100%;max-width:320px;
+  animation:card-in 0.5s var(--spring) both;
+}
+
+.setup-pair-icon{
+  font-size:56px;margin-bottom:16px;
+}
+
+.setup-pair-name{
+  font-size:18px;font-weight:700;
+  margin-bottom:16px;
+}
+
+.setup-pair-status{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:14px;font-weight:600;
+  color:var(--text3);
+  padding:12px 20px;
+  border-radius:var(--radius-xs);
+  background:var(--bg);
+}
+
+.setup-pair-status.success{
+  color:var(--success);background:var(--success-bg);
+}
+
+.setup-pair-status.error{
+  color:var(--danger);background:var(--danger-bg);
+}
+
+.spinner-small{
+  width:16px;height:16px;
+  border:2px solid var(--text4);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══ Notification step ═══ */
+.notif-illustration{
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:28px;
+}
+
+.notif-bell{
+  font-size:64px;
+  animation:bell-ring 2s ease-in-out infinite;
+}
+
+@keyframes bell-ring{
+  0%,100%{transform:rotate(0)}
+  10%{transform:rotate(14deg)}
+  20%{transform:rotate(-14deg)}
+  30%{transform:rotate(10deg)}
+  40%{transform:rotate(-8deg)}
+  50%{transform:rotate(0)}
+}
+
+.notif-bubble{
+  margin-top:12px;
+  padding:10px 20px;
+  background:var(--card);
+  border-radius:14px 14px 14px 4px;
+  box-shadow:var(--shadow-lg);
+  font-size:14px;font-weight:600;
+  color:var(--accent);
+  animation:notif-pop 0.5s 0.5s var(--spring) both;
+}
+
+@keyframes notif-pop{
+  from{opacity:0;transform:scale(0.8) translateY(10px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+.notif-option{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;
+  background:var(--card);
+  border-radius:var(--radius-md);
+  margin-bottom:10px;
+  box-shadow:var(--shadow);
+  border:2px solid transparent;
+  cursor:pointer;
+  transition:all 0.3s var(--spring);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.notif-option:active{transform:scale(0.97)}
+
+.notif-option.selected{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  box-shadow:0 0 0 4px rgba(124,58,237,0.08), var(--shadow-lg);
+}
+
+.notif-option-left{display:flex;align-items:center;gap:14px}
+
+.notif-option-icon{
+  width:44px;height:44px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+
+.notif-option h4{font-size:14px;font-weight:700}
+.notif-option p{font-size:12px;color:var(--text3);margin-top:2px}
+
+.notif-option .check-circle{
+  width:24px;height:24px;
+  border-radius:50%;
+  border:2px solid var(--text4);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s var(--spring);
+  flex-shrink:0;
+}
+
+.notif-option.selected .check-circle{
+  border-color:var(--accent);
+  background:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-medium);
+}
+
+.notif-option.selected .check-circle::after{
+  content:'';width:8px;height:8px;
+  border-radius:50%;background:#fff;
+}
+
+/* ═══ Notification toggle list ═══ */
+.notif-toggle-list{display:flex;flex-direction:column;gap:6px}
+
+.notif-toggle-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  transition:all 0.2s var(--ease);
+}
+
+.notif-toggle-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+
+.notif-toggle-icon{
+  width:38px;height:38px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+
+.notif-toggle-title{font-size:14px;font-weight:600}
+.notif-toggle-desc{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* ═══ Device settings ═══ */
+.dev-edit-header{
+  display:flex;flex-direction:column;align-items:center;
+  padding-bottom:24px;
+  border-bottom:1px solid rgba(139,92,246,0.06);
+  margin-bottom:20px;
+}
+
+.dev-edit-avatar{
+  width:80px;height:80px;
+  border-radius:24px;
+  background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;
+  margin-bottom:16px;
+  box-shadow:0 8px 30px rgba(124,58,237,0.25);
+  transition:transform 0.3s var(--spring);
+}
+
+.dev-edit-avatar:active{transform:scale(0.95)}
+
+.dev-edit-name-wrap{
+  text-align:center;width:100%;
+}
+
+.dev-edit-name-input{
+  width:100%;
+  text-align:center;
+  font-family:inherit;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-0.4px;
+  color:var(--text);
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  outline:none;
+  padding:8px 4px;
+  transition:all 0.3s var(--ease);
+  border-radius:0;
+}
+
+.dev-edit-name-input:focus{
+  border-bottom-color:var(--accent);
+}
+
+.dev-edit-name-input::placeholder{color:var(--text4)}
+
+.dev-edit-name-hint{
+  font-size:11px;
+  color:var(--text4);
+  margin-top:4px;
+  transition:opacity 0.3s;
+}
+
+.dev-edit-name-input:focus ~ .dev-edit-name-hint{opacity:0}
+
+.dev-edit-section-label{
+  font-size:11px;font-weight:700;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:0.8px;
+  margin-bottom:10px;
+}
+
+.device-settings-info{
+  display:flex;flex-direction:column;gap:4px;
+}
+
+.device-info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 16px;
+  background:var(--bg);
+  border-radius:var(--radius-xs);
+  font-size:13px;
+}
+
+.device-info-row span:first-child{color:var(--text3);font-weight:500}
+.device-info-row span:last-child{font-weight:600;font-variant-numeric:tabular-nums;max-width:60%;text-align:right;word-break:break-all}
+
+.dev-edit-danger-zone{
+  padding-top:16px;
+  border-top:1px solid rgba(239,68,68,0.08);
+}
+
+.dev-edit-delete-btn{
+  width:100%;padding:14px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid rgba(239,68,68,0.15);
+  background:rgba(239,68,68,0.04);
+  color:var(--danger);
+  font-family:inherit;font-size:14px;font-weight:600;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all 0.2s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.dev-edit-delete-btn:active{
+  background:var(--danger-bg);
+  transform:scale(0.98);
+}
+
+/* ═══ Selection haptic feedback ═══ */
+.select-flash{
+  animation:select-flash 0.4s ease;
+}
+
+@keyframes select-flash{
+  0%{box-shadow:0 0 0 0 rgba(124,58,237,0.4)}
+  50%{box-shadow:0 0 0 12px rgba(124,58,237,0)}
+  100%{box-shadow:none}
+}
+
+/* ═══ Progress bar ═══ */
+.progress-bar{
+  width:100%;height:6px;
+  background:var(--bg2);
+  border-radius:3px;
+  overflow:hidden;
+  margin:16px 0;
+}
+
+.progress-fill{
+  height:100%;
+  background:var(--gradient);
+  border-radius:3px;
+  width:0%;
+  transition:width 0.4s var(--ease);
+}
+
+.progress-fill.indeterminate{
+  width:30%;
+  animation:progress-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-slide{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(400%)}
+}
+
+/* ═══ Success burst ═══ */
+.success-burst{
+  position:relative;
+  display:inline-block;
+}
+
+.success-burst::after{
+  content:'';position:absolute;
+  inset:-20px;border-radius:50%;
+  background:radial-gradient(circle,rgba(16,185,129,0.2) 0%,transparent 70%);
+  animation:burst 0.6s ease-out;
+  pointer-events:none;
+}
+
+@keyframes burst{
+  0%{transform:scale(0);opacity:1}
+  100%{transform:scale(2);opacity:0}
+}
+
+/* ═══ Confetti ═══ */
+.confetti-container{
+  position:fixed;inset:0;z-index:9999;
+  pointer-events:none;overflow:hidden;
+}
+
+.confetti-piece{
+  position:absolute;
+  width:8px;height:8px;
+  border-radius:2px;
+  top:-10px;
+  animation:confetti-fall 2.5s ease-in forwards;
+}
+
+@keyframes confetti-fall{
+  0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}
+  80%{opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg) scale(0.5);opacity:0}
+}
+
+/* ═══ Step transition feedback ═══ */
+.step-complete-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;
+  border-radius:20px;
+  background:var(--success-bg);
+  color:var(--success);
+  font-size:13px;font-weight:700;
+  animation:badge-pop 0.5s var(--spring) both;
+  margin-bottom:12px;
+}
+
+@keyframes badge-pop{
+  from{opacity:0;transform:scale(0.7)}
+  to{opacity:1;transform:scale(1)}
+}
+
+/* ═══ Pairing progress stages ═══ */
+.pair-stages{
+  width:100%;margin-top:20px;
+}
+
+.pair-stage{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;
+  font-size:13px;
+  color:var(--text3);
+  transition:all 0.3s var(--ease);
+}
+
+.pair-stage.active{color:var(--text);font-weight:600}
+.pair-stage.done{color:var(--success)}
+
+.pair-stage-icon{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+  transition:all 0.4s var(--spring);
+  flex-shrink:0;
+}
+
+.pair-stage.active .pair-stage-icon{
+  background:var(--accent-soft);
+  color:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-medium);
+}
+
+.pair-stage.done .pair-stage-icon{
+  background:var(--success-bg);
+  color:var(--success);
+}
+
+/* ═══ Mega Toggle ═══ */
+.mega-toggle{
+  width:180px;height:180px;
+  border-radius:50%;
+  position:relative;
+  cursor:pointer;
+  margin:20px 0 28px;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 0.4s var(--spring);
+}
+
+.mega-toggle:active{transform:scale(0.93)}
+
+.mega-toggle-bg{
+  position:absolute;inset:0;
+  border-radius:50%;
+  background:var(--bg2);
+  border:3px solid rgba(139,92,246,0.1);
+  transition:all 0.5s var(--ease);
+  box-shadow:inset 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.mega-toggle.on .mega-toggle-bg{
+  background:var(--gradient);
+  border-color:transparent;
+  box-shadow:0 8px 40px rgba(124,58,237,0.35), inset 0 2px 10px rgba(255,255,255,0.1);
+}
+
+.mega-toggle-icon{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-55%);
+  font-size:52px;
+  transition:all 0.5s var(--spring);
+  filter:grayscale(0.5);
+}
+
+.mega-toggle.on .mega-toggle-icon{
+  filter:grayscale(0) brightness(10);
+  transform:translate(-50%,-55%) scale(1.1);
+}
+
+.mega-toggle-label{
+  position:absolute;
+  bottom:28px;left:50%;
+  transform:translateX(-50%);
+  font-size:13px;font-weight:700;
+  color:var(--text3);
+  transition:all 0.4s;
+  white-space:nowrap;
+}
+
+.mega-toggle.on .mega-toggle-label{
+  color:#fff;
+}
+
+/* Pulsing rings when ON */
+.mega-toggle.on::before,
+.mega-toggle.on::after{
+  content:'';position:absolute;inset:-10px;
+  border-radius:50%;
+  border:2px solid rgba(124,58,237,0.15);
+  animation:mega-pulse 2s ease-out infinite;
+}
+
+.mega-toggle.on::after{
+  inset:-22px;
+  animation-delay:0.5s;
+}
+
+@keyframes mega-pulse{
+  0%{transform:scale(0.95);opacity:0.6}
+  100%{transform:scale(1.15);opacity:0}
+}
+
+/* Setup shabbat info */
+.setup-shabbat-info{
+  width:100%;max-width:300px;
+  background:var(--card);
+  border-radius:var(--radius-sm);
+  padding:4px 0;
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+}
+
+.setup-shabbat-row{
+  display:flex;justify-content:space-between;
+  padding:12px 20px;
+  font-size:14px;
+  border-bottom:1px solid rgba(139,92,246,0.05);
+}
+
+.setup-shabbat-row:last-child{border:none}
+
+.setup-shabbat-row span:first-child{color:var(--text3);font-weight:500}
+.setup-shabbat-row span:last-child{font-weight:700;font-variant-numeric:tabular-nums}
+
+.setup-status-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 18px;
+  border-radius:20px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-size:12px;font-weight:600;
+  transition:all 0.4s var(--ease);
+}
+
+.setup-status-pill.active-pill{
+  background:var(--success-bg);
+  color:var(--success);
+}
+
+.setup-status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+  animation:pulse-dot 2s infinite;
+}
+
+.setup-status-pill.active-pill .setup-status-dot{
+  background:var(--success);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Onboarding ═══ -->
+<div class="onboarding onboarding-hidden" id="onboarding">
+  <div class="ob-slides">
+
+    <!-- Step 0: Welcome -->
+    <div class="ob-slide active" data-slide="0">
+      <div class="ob-illustration purple">&#x2721;</div>
+      <h2 class="ob-title">Bienvenue sur<br>Shabbat TV</h2>
+      <p class="ob-desc">Ne touchez plus jamais votre telecommande pendant Shabbat. On s'occupe de tout.</p>
+    </div>
+
+    <!-- Step 1: How it works -->
+    <div class="ob-slide" data-slide="1">
+      <div class="ob-illustration blue">&#x1F4FA;</div>
+      <h2 class="ob-title">Comment ca marche ?</h2>
+      <p class="ob-desc">Shabbat TV detecte quand la lecture s'arrete et relance automatiquement. Netflix, Disney+, YouTube... toutes les apps.</p>
+    </div>
+
+    <!-- Step 2: Sign in / Sign up -->
+    <div class="ob-slide" data-slide="2">
+      <div class="ob-illustration green" style="width:100px;height:100px;border-radius:30px;font-size:44px;margin-bottom:24px">&#x1F513;</div>
+      <h2 class="ob-title">Connectez-vous</h2>
+      <p class="ob-desc" style="margin-bottom:28px">Pour sauvegarder vos appareils et retrouver vos preferences.</p>
+
+      <!-- Google button -->
+      <button class="google-btn" onclick="googleSignIn()">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuer avec Google
+      </button>
+
+      <div class="ob-divider">
+        <span>ou par email</span>
+      </div>
+
+      <!-- Email form -->
+      <div class="ob-form" id="obAuthForm">
+        <div class="ob-field">
+          <label>Email</label>
+          <input class="ob-input" id="obEmail" type="email" placeholder="david@email.com" autocomplete="email">
+        </div>
+        <div id="obExtraFields" style="display:none">
+          <div class="ob-field">
+            <label>Prenom</label>
+            <input class="ob-input" id="obFirstName" placeholder="David" autocomplete="given-name">
+          </div>
+          <div class="ob-field">
+            <label>Nom</label>
+            <input class="ob-input" id="obLastName" placeholder="Cohen" autocomplete="family-name">
+          </div>
+        </div>
+        <button class="ob-btn ob-btn-primary" style="margin-top:4px" onclick="obEmailContinue()">Continuer</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Personalization (after auth) -->
+    <div class="ob-slide" data-slide="3">
+      <h2 class="ob-title ob-personal-title">Shalom <span id="obUserName" style="color:var(--accent)">!</span></h2>
+      <p class="ob-desc" style="margin-bottom:28px">Dis-nous en un peu plus sur toi</p>
+
+      <div class="ob-choice-grid">
+        <div class="ob-choice-card" onclick="obSelectGender(this,'homme')" data-val="homme">
+          <div class="ob-choice-icon">&#x1F468;</div>
+          <div class="ob-choice-label">Je suis<br><strong>un Homme</strong></div>
+        </div>
+        <div class="ob-choice-card" onclick="obSelectGender(this,'femme')" data-val="femme">
+          <div class="ob-choice-icon">&#x1F469;</div>
+          <div class="ob-choice-label">Je suis<br><strong>une Femme</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Ready -->
+    <div class="ob-slide" data-slide="4">
+      <div class="ob-ready-check">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="32" fill="url(#gcheck)"/>
+          <path d="M20 33l8 8 16-16" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="check-path"/>
+          <defs><linearGradient id="gcheck" x1="0" y1="0" x2="64" y2="64"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+        </svg>
+      </div>
+      <h2 class="ob-title" style="margin-top:24px">Tout est pret !</h2>
+      <p class="ob-desc">Ajoutez votre premiere Apple TV et profitez de Shabbat en toute serenite.</p>
+    </div>
+
+  </div>
+
+  <div class="ob-bottom">
+    <div class="ob-dots" id="obDots">
+      <div class="ob-dot active"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+    </div>
+    <button class="ob-btn ob-btn-primary" id="obNext" onclick="obNext()">Continuer</button>
+    <button class="ob-btn ob-btn-ghost" id="obSkip" onclick="obNext()">Passer</button>
+  </div>
+</div>
+
+<!-- ═══ Setup Wizard (post-inscription) ═══ -->
+<div class="setup-wizard setup-hidden" id="setupWizard">
+
+  <!-- Setup Step 1: Scan + Selection -->
+  <div class="setup-page active" data-setup="0">
+    <div class="setup-top">
+      <div class="setup-step-indicator">Etape 1 sur 4</div>
+      <h2 class="setup-title">Choisissez votre<br>Apple TV</h2>
+      <p class="setup-desc">Selectionnez l'appareil que vous souhaitez configurer pour Shabbat.</p>
+    </div>
+    <div class="setup-body">
+      <div class="scan-anim" id="setupScanAnim">
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-center">&#x1F4FA;</div>
+      </div>
+      <div id="setupScanStatus" class="setup-scan-status">Recherche en cours...</div>
+      <div id="setupScanResults" style="width:100%"></div>
+    </div>
+    <div class="setup-bottom">
+      <button class="ob-btn ob-btn-primary" id="setupNext1" onclick="setupGoTo(1)" disabled>Selectionner cet appareil</button>
+      <button class="ob-btn ob-btn-ghost" onclick="setupScan()">Rescanner</button>
+    </div>
+  </div>
+
+  <!-- Setup Step 2: Connexion / Appairage -->
+  <div class="setup-page" data-setup="1">
+    <div class="setup-top">
+      <div class="setup-step-indicator">Etape 2 sur 4</div>
+      <h2 class="setup-title" id="setupStep2Title">Connexion</h2>
+      <p class="setup-desc" id="setupStep2Desc">Appairage avec votre Apple TV en cours...</p>
+    </div>
+    <div class="setup-body" id="setupPairBody" style="display:flex;flex-direction:column;align-items:center">
+      <div class="setup-pair-card" id="setupPairCard">
+        <div class="setup-pair-icon">&#x1F4FA;</div>
+        <div class="setup-pair-name" id="setupPairName">--</div>
+        <div class="setup-pair-status" id="setupPairStatus">
+          <div class="spinner-small"></div>
+          <span>Verification...</span>
+        </div>
+      </div>
+    </div>
+    <div class="setup-bottom">
+      <button class="ob-btn ob-btn-primary" id="setupNext2" onclick="setupGoTo(2)" disabled>Continuer</button>
+      <button class="ob-btn ob-btn-ghost" onclick="setupGoTo(0)">Retour</button>
+    </div>
+  </div>
+
+  <!-- Setup Step 3: Notifications -->
+  <div class="setup-page" data-setup="2">
+    <div class="setup-top">
+      <div class="setup-step-indicator">Etape 3 sur 4</div>
+      <h2 class="setup-title">Restez informe</h2>
+      <p class="setup-desc">Recevez une alerte quand tout est pret, ou si un probleme survient pendant Shabbat.</p>
+    </div>
+    <div class="setup-body" style="display:flex;flex-direction:column;align-items:center">
+
+      <div class="notif-illustration">
+        <div class="notif-bell">&#x1F514;</div>
+        <div class="notif-bubble">Shabbat TV active !</div>
+      </div>
+
+      <div class="notif-options" style="width:100%">
+        <div class="notif-option selected" onclick="selectNotifOption(this,'on')">
+          <div class="notif-option-left">
+            <div class="notif-option-icon" style="background:var(--accent-soft)">&#x1F514;</div>
+            <div>
+              <h4>Activer les notifications</h4>
+              <p>Connexion, erreurs, fin de Shabbat</p>
+            </div>
+          </div>
+          <div class="check-circle"></div>
+        </div>
+        <div class="notif-option" onclick="selectNotifOption(this,'off')">
+          <div class="notif-option-left">
+            <div class="notif-option-icon" style="background:var(--bg2)">&#x1F515;</div>
+            <div>
+              <h4>Pas maintenant</h4>
+              <p>Vous pourrez les activer plus tard</p>
+            </div>
+          </div>
+          <div class="check-circle"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="setup-bottom">
+      <button class="ob-btn ob-btn-primary" onclick="setupNotifContinue()">Continuer</button>
+    </div>
+  </div>
+
+  <!-- Setup Step 4: Shabbat Mode ON/OFF -->
+  <div class="setup-page" data-setup="3">
+    <div class="setup-top">
+      <div class="setup-step-indicator">Etape 4 sur 4</div>
+      <h2 class="setup-title">Mode Shabbat</h2>
+      <p class="setup-desc">Activez pour que tout fonctionne automatiquement chaque semaine.</p>
+    </div>
+    <div class="setup-body" style="display:flex;flex-direction:column;align-items:center">
+
+      <div class="mega-toggle" id="megaToggle" onclick="toggleMegaShabbat()">
+        <div class="mega-toggle-bg"></div>
+        <div class="mega-toggle-icon" id="megaIcon">&#x2721;</div>
+        <div class="mega-toggle-label" id="megaLabel">Activer</div>
+      </div>
+
+      <div class="setup-shabbat-info" id="setupShabbatInfo">
+        <div class="setup-shabbat-row">
+          <span>Bougies</span>
+          <span id="setupCandle">--:--</span>
+        </div>
+        <div class="setup-shabbat-row">
+          <span>Havdalah</span>
+          <span id="setupHavdalah">--:--</span>
+        </div>
+        <div class="setup-shabbat-row">
+          <span>Appareil</span>
+          <span id="setupDeviceName">--</span>
+        </div>
+      </div>
+
+      <div class="setup-status-pill" id="setupStatusPill">
+        <span class="setup-status-dot"></span>
+        En attente de Shabbat
+      </div>
+    </div>
+    <div class="setup-bottom">
+      <button class="ob-btn ob-btn-primary" onclick="setupFinish()">C'est parti !</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- end setup wizard -->
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">&#x2721;</div>
+    <h1>Shabbat TV</h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="header-pill" id="connPill">
+      <div class="header-dot" id="sDot"></div>
+      <span class="header-label" id="sLabel"></span>
+    </div>
+    <button class="avatar-btn" id="avatarBtn" onclick="openSheet('profile')">
+      <span id="avatarInitial">?</span>
+    </button>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow" id="parasha">Chargement...</div>
+      <h2 class="hero-title" id="heroTitle">Shabbat Shalom</h2>
+      <div class="hero-row">
+        <div class="hero-time">
+          <small>Bougies</small>
+          <span id="tCandle">--:--</span>
+        </div>
+        <div class="hero-time">
+          <small>Havdalah</small>
+          <span id="tHavdalah">--:--</span>
+        </div>
+      </div>
+      <div id="heroBottom"></div>
+    </div>
+  </section>
+
+  <!-- Devices -->
+  <div class="section-head">
+    <span class="section-title">Mes appareils</span>
+  </div>
+  <div id="deviceList">
+    <div class="skel skel-card"></div>
+  </div>
+
+  <!-- Bento -->
+  <div class="section-head" style="margin-top:24px">
+    <span class="section-title">Services</span>
+  </div>
+  <div class="bento">
+    <div class="bento-card" onclick="openSheet('add')">
+      <div class="bento-icon i-add">&#x002B;</div>
+      <div class="bento-title">Ajouter un appareil</div>
+      <div class="bento-desc">Detecter une Apple TV</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('auto')">
+      <div class="bento-icon i-auto">&#x23F0;</div>
+      <div class="bento-title">Programmer</div>
+      <div class="bento-desc">Mode automatique</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('stats')">
+      <div class="bento-icon i-stats">&#x2764;</div>
+      <div class="bento-title">Statistiques</div>
+      <div class="bento-desc">Mes Shabbats</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('city')">
+      <div class="bento-icon i-city">&#x1F30D;</div>
+      <div class="bento-title">Ma ville</div>
+      <div class="bento-desc">Horaires locaux</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+
+<!-- Sheet: Add device -->
+<div class="sheet" id="sheet-add">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Ajouter un appareil</div>
+  <div id="addBody">
+    <div class="scan-step" id="scanStep">
+      <div class="scan-anim">
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-center">&#x1F4FA;</div>
+      </div>
+      <div class="scan-text">Recherche en cours...</div>
+      <div class="scan-sub">Detection des Apple TV sur votre reseau</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Auto -->
+<div class="sheet" id="sheet-auto">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Programmer</div>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:16px">
+    Choisissez comment activer le mode Shabbat.
+  </p>
+  <div class="auto-option selected" onclick="selectAuto(this,'auto')">
+    <div class="auto-option-left">
+      <div class="auto-option-icon" style="background:var(--gradient-cool)">&#x2728;</div>
+      <div>
+        <h4>Automatique</h4>
+        <p>Se lance et s'arrete selon les horaires</p>
+      </div>
+    </div>
+    <div class="auto-radio"></div>
+  </div>
+  <div class="auto-option" onclick="selectAuto(this,'manual')">
+    <div class="auto-option-left">
+      <div class="auto-option-icon" style="background:var(--gradient-warm)">&#x270B;</div>
+      <div>
+        <h4>Manuel</h4>
+        <p>Activez et desactivez vous-meme</p>
+      </div>
+    </div>
+    <div class="auto-radio"></div>
+  </div>
+  <div style="height:16px"></div>
+  <button class="btn btn-primary" onclick="saveAuto()">Enregistrer</button>
+</div>
+
+<!-- Sheet: Stats -->
+<div class="sheet" id="sheet-stats">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Statistiques</div>
+  <div id="statsBody">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-big" id="statShabbats">--</div>
+        <div class="stat-label">Shabbats geres</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-big" id="statRelances">--</div>
+        <div class="stat-label">Relances auto</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-big" id="statReconnect">--</div>
+        <div class="stat-label">Reconnexions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-big" id="statErrors">--</div>
+        <div class="stat-label">Erreurs</div>
+      </div>
+    </div>
+    <div class="sheet-title" style="font-size:16px;margin-top:8px">Historique</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- Sheet: City -->
+<div class="sheet" id="sheet-city">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Ma ville</div>
+  <div class="city-current">
+    <div class="city-icon">&#x1F1EB;&#x1F1F7;</div>
+    <div>
+      <div class="city-name">Paris</div>
+      <div class="city-sub">Horaires Ile-de-France</div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--text3);line-height:1.6">
+    Les horaires de Shabbat sont automatiquement calcules pour votre ville.
+    Le changement de ville sera disponible dans une prochaine version.
+  </p>
+</div>
+
+<!-- Sheet: Profile -->
+<div class="sheet" id="sheet-profile">
+  <div class="sheet-bar"></div>
+  <div class="profile-header">
+    <div class="profile-avatar-large" id="profileAvatarLg">?</div>
+    <div class="profile-name" id="profileName">--</div>
+    <div class="profile-email" id="profileEmail">--</div>
+  </div>
+
+  <div class="profile-menu-item" onclick="openSheet('city')">
+    <div class="profile-menu-left">
+      <div class="profile-menu-icon" style="background:rgba(251,191,36,0.1)">&#x1F30D;</div>
+      <div><h4>Ma ville</h4><p>Horaires Shabbat locaux</p></div>
+    </div>
+    <span class="profile-menu-arrow">&#x203A;</span>
+  </div>
+
+  <div class="profile-menu-item" onclick="openSheet('stats')">
+    <div class="profile-menu-left">
+      <div class="profile-menu-icon" style="background:rgba(244,63,94,0.08)">&#x2764;</div>
+      <div><h4>Mes statistiques</h4><p>Historique et relances</p></div>
+    </div>
+    <span class="profile-menu-arrow">&#x203A;</span>
+  </div>
+
+  <div class="profile-menu-item" onclick="openSheet('notif')">
+    <div class="profile-menu-left">
+      <div class="profile-menu-icon" style="background:rgba(124,58,237,0.08)">&#x1F514;</div>
+      <div><h4>Notifications</h4><p>Alertes push</p></div>
+    </div>
+    <span class="profile-menu-arrow">&#x203A;</span>
+  </div>
+
+  <div class="profile-menu-item">
+    <div class="profile-menu-left">
+      <div class="profile-menu-icon" style="background:rgba(96,165,250,0.1)">&#x2753;</div>
+      <div><h4>Aide</h4><p>Comment ca marche</p></div>
+    </div>
+    <span class="profile-menu-arrow">&#x203A;</span>
+  </div>
+
+  <button class="logout-btn" onclick="doLogout()">Se deconnecter</button>
+</div>
+
+<!-- Sheet: Device settings -->
+<div class="sheet" id="sheet-device">
+  <div class="sheet-bar"></div>
+
+  <div class="dev-edit-header">
+    <div class="dev-edit-avatar" id="deviceSettingsAvatar">&#x1F4FA;</div>
+    <div class="dev-edit-name-wrap">
+      <input class="dev-edit-name-input" id="deviceEditName" placeholder="Nom de l'appareil" spellcheck="false">
+      <div class="dev-edit-name-hint">Appuyez pour modifier le nom</div>
+    </div>
+  </div>
+
+  <div class="dev-edit-section-label">Informations</div>
+  <div class="device-settings-info" id="deviceSettingsInfo"></div>
+
+  <div style="height:24px"></div>
+  <button class="btn btn-primary" onclick="saveDeviceSettings()">Enregistrer les modifications</button>
+  <div style="height:32px"></div>
+  <div class="dev-edit-danger-zone">
+    <div class="dev-edit-section-label" style="color:var(--danger)">Zone de danger</div>
+    <button class="dev-edit-delete-btn" onclick="confirmDeleteDevice()">
+      <span>&#x1F5D1;</span> Supprimer cet appareil
+    </button>
+  </div>
+</div>
+
+<!-- Sheet: Notifications -->
+<div class="sheet" id="sheet-notif">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Notifications</div>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.6">
+    Choisissez les alertes que vous souhaitez recevoir.
+  </p>
+
+  <div class="notif-toggle-list">
+    <div class="notif-toggle-item">
+      <div class="notif-toggle-left">
+        <div class="notif-toggle-icon" style="background:var(--success-bg)">&#x2705;</div>
+        <div>
+          <div class="notif-toggle-title">Connexion reussie</div>
+          <div class="notif-toggle-desc">Quand l'Apple TV est connectee</div>
+        </div>
+      </div>
+      <label class="big-toggle"><input type="checkbox" checked data-notif="connected"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+
+    <div class="notif-toggle-item">
+      <div class="notif-toggle-left">
+        <div class="notif-toggle-icon" style="background:var(--danger-bg)">&#x26A0;</div>
+        <div>
+          <div class="notif-toggle-title">Erreurs et deconnexions</div>
+          <div class="notif-toggle-desc">Si un appareil perd la connexion</div>
+        </div>
+      </div>
+      <label class="big-toggle"><input type="checkbox" checked data-notif="errors"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+
+    <div class="notif-toggle-item">
+      <div class="notif-toggle-left">
+        <div class="notif-toggle-icon" style="background:var(--accent-soft)">&#x1F504;</div>
+        <div>
+          <div class="notif-toggle-title">Relances automatiques</div>
+          <div class="notif-toggle-desc">Chaque fois que la lecture est relancee</div>
+        </div>
+      </div>
+      <label class="big-toggle"><input type="checkbox" data-notif="relances"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+
+    <div class="notif-toggle-item">
+      <div class="notif-toggle-left">
+        <div class="notif-toggle-icon" style="background:rgba(251,191,36,0.1)">&#x1F56F;</div>
+        <div>
+          <div class="notif-toggle-title">Entree de Shabbat</div>
+          <div class="notif-toggle-desc">Rappel avant l'allumage des bougies</div>
+        </div>
+      </div>
+      <label class="big-toggle"><input type="checkbox" checked data-notif="shabbat_start"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+
+    <div class="notif-toggle-item">
+      <div class="notif-toggle-left">
+        <div class="notif-toggle-icon" style="background:rgba(96,165,250,0.1)">&#x2B50;</div>
+        <div>
+          <div class="notif-toggle-title">Fin de Shabbat</div>
+          <div class="notif-toggle-desc">Resume apres havdalah</div>
+        </div>
+      </div>
+      <label class="big-toggle"><input type="checkbox" checked data-notif="shabbat_end"><span class="track"></span><span class="thumb"></span></label>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+  <button class="btn btn-primary" onclick="saveNotifPrefs()">Enregistrer</button>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+<script>
+let devices=[];
+let ws=null;
+let currentUser=null;
+let obSlide=0;
+const OB_TOTAL=5;
+
+async function api(p,o={}){try{const r=await fetch(p,o);return await r.json()}catch{return null}}
+
+/* ═══════════════════════════════════════
+   USER / AUTH
+   ═══════════════════════════════════════ */
+
+function getUser(){
+  try{return JSON.parse(localStorage.getItem('shabbat_user'))}catch{return null}
+}
+
+function saveUser(u){
+  localStorage.setItem('shabbat_user',JSON.stringify(u));
+  currentUser=u;
+  updateAvatar();
+}
+
+function updateAvatar(){
+  const init=document.getElementById('avatarInitial');
+  if(currentUser&&currentUser.firstName){
+    const letter=currentUser.firstName.charAt(0).toUpperCase();
+    // Only use picture if it's a valid URL (not empty, not broken)
+    if(currentUser.picture && currentUser.picture.startsWith('http')){
+      const img=new Image();
+      img.onload=()=>{init.innerHTML=`<img src="${esc(currentUser.picture)}" alt="${letter}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`};
+      img.onerror=()=>{init.textContent=letter};
+      img.src=currentUser.picture;
+    }else{
+      init.textContent=letter;
+    }
+  }else{
+    init.textContent='?';
+  }
+}
+
+function updateProfileSheet(){
+  if(!currentUser)return;
+  const fullName=`${currentUser.firstName||''} ${currentUser.lastName||''}`.trim();
+  const letter=(currentUser.firstName||'?').charAt(0).toUpperCase();
+  const avatarEl=document.getElementById('profileAvatarLg');
+
+  if(currentUser.picture && currentUser.picture.startsWith('http')){
+    const img=new Image();
+    img.onload=()=>{avatarEl.innerHTML=`<img src="${esc(currentUser.picture)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`};
+    img.onerror=()=>{avatarEl.textContent=letter};
+    img.src=currentUser.picture;
+  }else{
+    avatarEl.textContent=letter;
+  }
+  document.getElementById('profileName').textContent=fullName||'Utilisateur';
+  document.getElementById('profileEmail').textContent=currentUser.email||'';
+}
+
+function doLogout(){
+  localStorage.removeItem('shabbat_user');
+  currentUser=null;
+  closeSheet();
+  // Show onboarding again
+  const ob=document.getElementById('onboarding');
+  ob.classList.remove('onboarding-hidden','hiding');
+  obSlide=0;
+  obGoTo(0);
+  toast('Deconnecte');
+}
+
+/* ═══════════════════════════════════════
+   GOOGLE SIGN IN (Google Identity Services)
+   ═══════════════════════════════════════ */
+
+// IMPORTANT: Remplacez par votre Client ID Google Cloud
+// Creez-le sur https://console.cloud.google.com/apis/credentials
+const GOOGLE_CLIENT_ID = '752558880706-4fh0m4j075f7qjt0d1kqca1c0njr5ndm.apps.googleusercontent.com';
+
+function initGoogleSignIn(){
+  if(!window.google || !window.google.accounts) return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleResponse,
+    auto_select: false,
+  });
+}
+
+function handleGoogleResponse(response){
+  // Decode JWT token from Google
+  const payload = parseJwt(response.credential);
+  if(!payload) { toast('Erreur de connexion Google'); return; }
+
+  const user = {
+    firstName: payload.given_name || '',
+    lastName: payload.family_name || '',
+    email: payload.email || '',
+    picture: payload.picture || '',
+    provider: 'google',
+    gender: null,
+    googleId: payload.sub,
+  };
+
+  saveUser(user);
+  document.getElementById('obUserName').textContent = user.firstName + ' !';
+  obGoTo(3);
+}
+
+function parseJwt(token){
+  try{
+    const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(atob(base64));
+  }catch{ return null; }
+}
+
+function googleSignIn(){
+  if(window.google && window.google.accounts && GOOGLE_CLIENT_ID){
+    // Real Google Sign-In
+    google.accounts.id.prompt((notification) => {
+      if(notification.isNotDisplayed() || notification.isSkippedMoment()){
+        // Fallback: render button in a popup
+        showGooglePopup();
+      }
+    });
+  } else {
+    // Google SDK not loaded or no client ID — show manual popup
+    showGooglePopup();
+  }
+}
+
+function showGooglePopup(){
+  if(window.google && window.google.accounts && GOOGLE_CLIENT_ID){
+    // Remove any existing popup
+    const old=document.getElementById('googlePopup');
+    if(old)old.remove();
+
+    const overlay=document.createElement('div');
+    overlay.id='googlePopup';
+    overlay.className='google-popup-overlay';
+    overlay.style.cssText='position:fixed;inset:0;z-index:600;background:rgba(30,27,75,0.3);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;';
+    overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove()};
+
+    const popup=document.createElement('div');
+    popup.className='google-popup';
+    popup.style.cssText='background:var(--card,#fff);padding:32px 24px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.15);text-align:center;width:calc(100% - 32px);max-width:360px;';
+    popup.innerHTML=`
+      <div style="font-size:36px;margin-bottom:12px">&#x1F513;</div>
+      <p style="font-weight:700;font-size:18px;margin-bottom:4px">Connexion Google</p>
+      <p style="font-size:13px;color:#a5a3c7;margin-bottom:24px">Connectez-vous avec votre compte Google</p>
+      <div id="gsi-button" style="display:flex;justify-content:center"></div>
+      <button onclick="document.getElementById('googlePopup').remove()" style="margin-top:20px;background:none;border:none;color:#a5a3c7;cursor:pointer;font-size:14px;font-weight:500;font-family:inherit;padding:8px 16px">Annuler</button>
+    `;
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    google.accounts.id.renderButton(document.getElementById('gsi-button'), {
+      type:'standard', theme:'outline', size:'large', width:300, text:'continue_with', shape:'pill',
+    });
+  } else {
+    toast('Google Sign-In indisponible, utilisez l\'email');
+  }
+}
+
+// Init Google when SDK loads
+window.addEventListener('load', () => setTimeout(initGoogleSignIn, 1000));
+
+/* ═══════════════════════════════════════
+   ONBOARDING
+   ═══════════════════════════════════════ */
+
+function obGoTo(idx){
+  obSlide=idx;
+  document.querySelectorAll('.ob-slide').forEach((s,i)=>{
+    s.classList.remove('active','exit-left');
+    if(i<idx)s.classList.add('exit-left');
+    if(i===idx)s.classList.add('active');
+  });
+  // Dots
+  document.querySelectorAll('#obDots .ob-dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===idx);
+  });
+  // Buttons
+  const next=document.getElementById('obNext');
+  const skip=document.getElementById('obSkip');
+  if(idx===2){
+    // Auth step — hide next/skip, form has its own buttons
+    next.style.display='none';
+    skip.style.display='none';
+  }else if(idx===OB_TOTAL-1){
+    // Last step
+    next.style.display='';
+    next.textContent='C\'est parti !';
+    skip.style.display='none';
+  }else if(idx===3){
+    // Gender step
+    next.style.display='';
+    next.textContent='Continuer';
+    skip.style.display='';
+    skip.textContent='Passer';
+  }else{
+    next.style.display='';
+    next.textContent='Continuer';
+    skip.style.display='';
+    skip.textContent='Passer';
+  }
+}
+
+function obNext(){
+  if(obSlide===2){
+    // Auth step — shouldn't reach here, but skip
+    return;
+  }
+  if(obSlide===3){
+    // Save gender if selected
+    const sel=document.querySelector('.ob-choice-card.selected');
+    if(sel&&currentUser){
+      currentUser.gender=sel.dataset.val;
+      saveUser(currentUser);
+    }
+  }
+  if(obSlide>=OB_TOTAL-1){
+    // Done!
+    obFinish();
+    return;
+  }
+  obGoTo(obSlide+1);
+}
+
+function obEmailContinue(){
+  const email=document.getElementById('obEmail').value.trim();
+  if(!email||!email.includes('@')){
+    toast('Entrez un email valide');
+    return;
+  }
+
+  const extra=document.getElementById('obExtraFields');
+  if(extra.style.display==='none'){
+    // Show name fields
+    extra.style.display='';
+    extra.style.animation='card-in 0.4s var(--spring) both';
+    return;
+  }
+
+  const firstName=document.getElementById('obFirstName').value.trim();
+  const lastName=document.getElementById('obLastName').value.trim();
+  if(!firstName){
+    toast('Entrez votre prenom');
+    return;
+  }
+
+  saveUser({
+    firstName, lastName, email,
+    picture:'', provider:'email', gender:null,
+  });
+
+  // Go to personalization
+  document.getElementById('obUserName').textContent=firstName+' !';
+  obGoTo(3);
+}
+
+function obSelectGender(el,val){
+  document.querySelectorAll('.ob-choice-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function obFinish(){
+  const ob=document.getElementById('onboarding');
+  ob.classList.add('hiding');
+  setTimeout(()=>{
+    ob.classList.add('onboarding-hidden');
+    updateAvatar();
+    updateProfileSheet();
+    // Launch setup wizard
+    showSetup();
+  },500);
+}
+
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+function fmtTime(iso){
+  if(!iso)return'--:--';
+  try{return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}catch{return'--:--'}
+}
+
+/* ── Countdown ── */
+function getCountdown(isoCandle, isoHavdalah){
+  if(!isoCandle)return null;
+  const now=new Date();
+  const candle=new Date(isoCandle);
+  const havdalah=isoHavdalah?new Date(isoHavdalah):null;
+
+  if(havdalah && now>=candle && now<=havdalah) return{type:'active'};
+  if(now<candle){
+    const diff=candle-now;
+    const h=Math.floor(diff/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    return{type:'countdown',h,m};
+  }
+  return{type:'passed'};
+}
+
+let shabbatData=null;
+
+async function loadShabbat(){
+  const d=await api('/api/shabbat');
+  if(!d)return;
+  shabbatData=d;
+  document.getElementById('parasha').textContent=d.parasha||'';
+  document.getElementById('tCandle').textContent=fmtTime(d.candle_lighting);
+  document.getElementById('tHavdalah').textContent=fmtTime(d.havdalah);
+  updateHeroBottom();
+}
+
+function updateHeroBottom(){
+  if(!shabbatData)return;
+  const c=getCountdown(shabbatData.candle_lighting, shabbatData.havdalah);
+  const el=document.getElementById('heroBottom');
+  if(!c||c.type==='passed'){
+    el.innerHTML='';
+    document.getElementById('heroTitle').textContent='Shabbat Shalom';
+  }else if(c.type==='active'){
+    document.getElementById('heroTitle').textContent='Shabbat Shalom !';
+    el.innerHTML=`<div class="hero-badge-active"><span class="badge-live"></span> Shabbat en cours</div>`;
+  }else{
+    document.getElementById('heroTitle').textContent='Shabbat Shalom';
+    el.innerHTML=`<div class="hero-countdown">Shabbat dans <span class="timer">${c.h}h ${String(c.m).padStart(2,'0')}min</span></div>`;
+  }
+}
+
+/* ── Devices ── */
+async function loadDevices(){
+  const data=await api('/api/devices');
+  const dot=document.getElementById('sDot');
+  const lab=document.getElementById('sLabel');
+
+  if(!data){
+    dot.classList.add('off');lab.textContent='Hors connexion';
+    document.getElementById('deviceList').innerHTML=`
+      <div class="empty"><div class="empty-icon">&#x1F4E1;</div>
+      <h3>Vous etes hors connexion</h3><p>Verifiez votre connexion Wi-Fi et reessayez</p></div>`;
+    return;
+  }
+
+  dot.classList.remove('off');lab.textContent='';
+  devices=data;
+
+  if(!data.length){
+    document.getElementById('deviceList').innerHTML=`
+      <div class="empty"><div class="empty-icon">&#x1F4FA;</div>
+      <h3>Aucun appareil</h3>
+      <p>Appuyez sur "Ajouter un appareil" pour commencer</p></div>`;
+    return;
+  }
+
+  document.getElementById('deviceList').innerHTML=data.map(d=>{
+    const statusClass=d.script_running?'on':(d.error_count>0?'error':'off');
+    const statusText=d.script_running?'Tout fonctionne':(d.error_count>0?'Erreur detectee':'Inactif');
+    return`
+    <div class="device-card ${d.script_running?'active':''}" id="dev-${d.id}">
+      <div class="dev-top">
+        <div class="dev-left" onclick="openDeviceSettings(${d.id})" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
+          <div class="dev-avatar"><span>&#x1F4FA;</span></div>
+          <div>
+            <div class="dev-name">${esc(d.name)}</div>
+            <div class="dev-subtitle">Apple TV &middot; Modifier &#x270E;</div>
+          </div>
+        </div>
+        <label class="big-toggle">
+          <input type="checkbox" ${d.script_running?'checked':''}
+                 onchange="toggleDev(${d.id},this.checked)">
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+      </div>
+      <div class="dev-status ${statusClass}">
+        <span class="dot"></span>
+        ${statusText}
+        ${d.script_running&&d.select_count?' &middot; '+d.select_count+' relance'+(d.select_count>1?'s':''):''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleDev(id,on){
+  if(on){
+    const r=await api(`/api/script/start/${id}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({auto_shabbat:true})
+    });
+    toast(r?.success?'Mode Shabbat active':(r?.error||'Erreur'));
+  }else{
+    const r=await api(`/api/script/stop/${id}`,{method:'POST'});
+    toast(r?.success?'Mode Shabbat desactive':'Erreur');
+  }
+  setTimeout(loadDevices,800);
+}
+
+/* ── Scan / Add ── */
+async function doScan(){
+  const body=document.getElementById('addBody');
+  body.innerHTML=`<div class="scan-step">
+    <div class="scan-anim"><div class="scan-ring"></div><div class="scan-ring"></div><div class="scan-ring"></div>
+    <div class="scan-center">&#x1F4FA;</div></div>
+    <div class="scan-text">Recherche en cours...</div>
+    <div class="scan-sub">Detection des Apple TV sur votre reseau</div></div>`;
+
+  const data=await api('/api/scan');
+  if(!data||data.error||!data.length){
+    body.innerHTML=`<div class="empty"><div class="empty-icon">&#x1F50E;</div>
+      <h3>Aucune Apple TV trouvee</h3>
+      <p>Verifiez que vos Apple TV sont allumees et sur le meme reseau Wi-Fi</p></div>`;
+    return;
+  }
+
+  const paired=devices.map(d=>d.identifier);
+  body.innerHTML=`<p style="font-size:13px;color:var(--text3);margin-bottom:14px">
+    ${data.length} appareil${data.length>1?'s':''} detecte${data.length>1?'s':''} sur votre reseau
+  </p>`+data.map(a=>`
+    <div class="found-device">
+      <div class="found-left">
+        <div class="found-avatar">&#x1F4FA;</div>
+        <div>
+          <div class="found-name">${esc(a.name)}</div>
+          <div class="found-meta">${a.protocols.join(' &middot; ')}</div>
+        </div>
+      </div>
+      ${paired.includes(a.identifier)
+        ?'<span class="chip chip-paired">Appaire</span>'
+        :'<button class="chip chip-add" onclick="toast(\'Appairage en cours...\')">Ajouter</button>'}
+    </div>
+  `).join('');
+}
+
+/* ── Auto mode ── */
+function selectAuto(el,mode){
+  document.querySelectorAll('.auto-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.dataset.mode=mode;
+}
+
+function saveAuto(){
+  toast('Mode enregistre');
+  closeSheet();
+}
+
+/* ── Stats ── */
+async function loadStats(){
+  const data=await api('/api/history');
+  if(!data)return;
+
+  const sh=data.shabbat_history||[];
+  const stats=data.stats||{};
+  const events=data.events||[];
+
+  document.getElementById('statShabbats').textContent=sh.length;
+
+  const selects=events.filter(e=>e.type==='select').length;
+  const reconnects=events.filter(e=>e.type==='connection').length;
+  const errors=events.filter(e=>e.type==='error').length;
+
+  document.getElementById('statRelances').textContent=selects;
+  document.getElementById('statReconnect').textContent=reconnects;
+  document.getElementById('statErrors').textContent=errors;
+
+  const list=document.getElementById('historyList');
+  if(!sh.length){
+    list.innerHTML='<p style="color:var(--text3);text-align:center;padding:16px">Pas encore d\'historique</p>';
+    return;
+  }
+
+  list.innerHTML=sh.map(s=>`
+    <div class="history-item">
+      <div>
+        <h4>${esc(s.parasha)||'Shabbat'}</h4>
+        <div class="date">${s.date}</div>
+      </div>
+      <div class="history-times">${fmtTime(s.candle_lighting)} &#x2192; ${fmtTime(s.havdalah)}</div>
+    </div>
+  `).join('');
+}
+
+/* ── Device settings ── */
+let editingDeviceId=null;
+
+function openDeviceSettings(deviceId){
+  editingDeviceId=deviceId;
+  const d=devices.find(x=>x.id===deviceId);
+  if(!d)return;
+
+  document.getElementById('deviceSheetTitle').textContent=d.name;
+  document.getElementById('deviceEditName').value=d.name;
+  document.getElementById('deviceSettingsInfo').innerHTML=`
+    <div class="device-info-row"><span>Identifiant</span><span>${esc(d.identifier)}</span></div>
+    <div class="device-info-row"><span>Adresse IP</span><span>${esc(d.address)}</span></div>
+    <div class="device-info-row"><span>Protocoles</span><span>${d.has_credentials?'Companion, AirPlay':'Aucun'}</span></div>
+    <div class="device-info-row"><span>Status</span><span>${d.script_running?'Actif':'Inactif'}</span></div>
+  `;
+  openSheet('device');
+}
+
+async function saveDeviceSettings(){
+  if(!editingDeviceId)return;
+  const newName=document.getElementById('deviceEditName').value.trim();
+  if(!newName){toast('Entrez un nom');return;}
+
+  await api('/api/device/rename/'+editingDeviceId,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:newName}),
+  });
+  toast('Appareil renomme');
+  closeSheet();
+  await loadDevices();
+}
+
+function confirmDeleteDevice(){
+  if(!editingDeviceId)return;
+  const d=devices.find(x=>x.id===editingDeviceId);
+  if(!confirm(`Supprimer "${d?d.name:'cet appareil'}" ? Cette action est irreversible.`))return;
+  deleteDevice(editingDeviceId);
+}
+
+async function deleteDevice(deviceId){
+  await api('/api/device/delete/'+deviceId,{method:'POST'});
+  toast('Appareil supprime');
+  editingDeviceId=null;
+  closeSheet();
+  await loadDevices();
+}
+
+/* ── Sheets ── */
+function openSheet(name){
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sheet-'+name).classList.add('open');
+  if(name==='add')doScan();
+  if(name==='stats')loadStats();
+}
+
+function closeSheet(){
+  document.getElementById('overlay').classList.remove('open');
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
+}
+
+/* ── WebSocket ── */
+function connectWS(){
+  const p=location.protocol==='https:'?'wss:':'ws:';
+  ws=new WebSocket(`${p}//${location.host}/ws`);
+  ws.onmessage=()=>loadDevices();
+  ws.onclose=()=>setTimeout(connectWS,3000);
+  ws.onerror=()=>{};
+}
+
+/* ═══════════════════════════════════════
+   SETUP WIZARD (3 steps post-signup)
+   ═══════════════════════════════════════ */
+
+let megaShabbatOn=false;
+let selectedScanDevice=null; // the device selected during scan
+
+function showSetup(){
+  const w=document.getElementById('setupWizard');
+  w.classList.remove('setup-hidden','hiding');
+  selectedScanDevice=null;
+  setupGoTo(0);
+  setTimeout(setupScan,500);
+}
+
+function setupGoTo(idx){
+  document.querySelectorAll('.setup-page').forEach((p,i)=>{
+    p.classList.remove('active','exit-left');
+    if(i<idx)p.classList.add('exit-left');
+    if(i===idx)p.classList.add('active');
+  });
+  // Reset and relaunch processes when entering a step
+  if(idx===0){
+    // Re-entering scan — rescan if no device selected
+    if(!selectedScanDevice) setTimeout(setupScan,300);
+  }
+  if(idx===1){
+    // Always restart pairing process when entering step 2
+    document.getElementById('setupNext2').disabled=true;
+    setupStartPairing();
+  }
+  if(idx===3) setupLoadShabbat();
+}
+
+/* ── Step 1: Scan + select ONE device ── */
+async function setupScan(){
+  selectedScanDevice=null;
+  document.getElementById('setupScanStatus').textContent='Recherche en cours...';
+  document.getElementById('setupScanResults').innerHTML='';
+  document.getElementById('setupScanAnim').style.display='';
+  document.getElementById('setupNext1').disabled=true;
+
+  const data=await api('/api/scan');
+  document.getElementById('setupScanAnim').style.display='none';
+
+  if(!data||!data.length){
+    document.getElementById('setupScanStatus').textContent='Aucune Apple TV trouvee';
+    document.getElementById('setupScanResults').innerHTML=`
+      <p style="font-size:13px;color:var(--text3);text-align:center;margin-top:12px;line-height:1.5">
+        Verifiez que vos Apple TV sont allumees<br>et sur le meme reseau Wi-Fi.
+      </p>`;
+    return;
+  }
+
+  const count=data.length;
+  document.getElementById('setupScanStatus').textContent=count+' appareil'+(count>1?'s':'')+' detecte'+(count>1?'s':'')+' — selectionnez-en un';
+
+  document.getElementById('setupScanResults').innerHTML=data.map((a,i)=>`
+    <div class="scan-device-selectable" onclick="setupSelectDevice(this,${i})" data-idx="${i}">
+      <div class="setup-device-icon">&#x1F4FA;</div>
+      <div style="flex:1">
+        <div class="setup-device-name">${esc(a.name)}</div>
+        <div class="setup-device-sub">${a.protocols.join(' &middot; ')}</div>
+      </div>
+      <div class="check-circle"></div>
+    </div>
+  `).join('');
+
+  // Store scan data for selection
+  window._scanData=data;
+}
+
+function setupSelectDevice(el,idx){
+  document.querySelectorAll('.scan-device-selectable').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  // Flash effect
+  el.classList.remove('select-flash');
+  void el.offsetWidth; // reflow
+  el.classList.add('select-flash');
+  // Haptic vibration if available
+  if(navigator.vibrate) navigator.vibrate(20);
+  selectedScanDevice=window._scanData[idx];
+  document.getElementById('setupNext1').disabled=false;
+}
+
+/* ── Step 2: Pairing / connection check ── */
+async function setupStartPairing(){
+  if(!selectedScanDevice){
+    document.getElementById('setupStep2Title').textContent='Aucun appareil';
+    document.getElementById('setupStep2Desc').textContent='Retournez en arriere pour en selectionner un.';
+    document.getElementById('setupPairBody').innerHTML=`
+      <div class="empty" style="padding:20px">
+        <div class="empty-icon">&#x1F448;</div>
+        <h3>Selectionnez d'abord un appareil</h3>
+      </div>`;
+    return;
+  }
+
+  const name=selectedScanDevice.name;
+  document.getElementById('setupStep2Title').textContent=name;
+  document.getElementById('setupStep2Desc').textContent='Verification de la connexion...';
+  document.getElementById('setupNext2').disabled=true;
+
+  // Reset the pair card
+  document.getElementById('setupPairBody').innerHTML=`
+    <div class="setup-pair-card" id="setupPairCard">
+      <div class="setup-pair-icon">&#x1F4FA;</div>
+      <div class="setup-pair-name">${esc(name)}</div>
+      <div class="progress-bar"><div class="progress-fill" id="pairProgress" style="width:10%"></div></div>
+      <div class="pair-stages">
+        <div class="pair-stage active" id="ps1"><div class="pair-stage-icon">1</div>Recherche de l'appareil...</div>
+        <div class="pair-stage" id="ps2"><div class="pair-stage-icon">2</div>Demande d'appairage</div>
+        <div class="pair-stage" id="ps3"><div class="pair-stage-icon">3</div>Connexion securisee</div>
+      </div>
+    </div>`;
+
+  // Refresh devices to check if already paired
+  await loadDevices();
+  const paired=devices.find(d=>d.identifier===selectedScanDevice.identifier);
+
+  // Stage 1 done
+  await new Promise(r=>setTimeout(r,800));
+  document.getElementById('pairProgress').style.width='30%';
+  document.getElementById('ps1').classList.remove('active');
+  document.getElementById('ps1').classList.add('done');
+  document.getElementById('ps1').querySelector('.pair-stage-icon').textContent='✓';
+  document.getElementById('ps2').classList.add('active');
+
+  if(paired){
+    // Already paired — quick success flow
+    await new Promise(r=>setTimeout(r,600));
+    document.getElementById('pairProgress').style.width='70%';
+    document.getElementById('ps2').classList.remove('active');
+    document.getElementById('ps2').classList.add('done');
+    document.getElementById('ps2').querySelector('.pair-stage-icon').textContent='✓';
+    document.getElementById('ps3').classList.add('active');
+    await new Promise(r=>setTimeout(r,600));
+    document.getElementById('pairProgress').style.width='100%';
+    document.getElementById('ps3').classList.remove('active');
+    document.getElementById('ps3').classList.add('done');
+    document.getElementById('ps3').querySelector('.pair-stage-icon').textContent='✓';
+
+    await new Promise(r=>setTimeout(r,300));
+    document.getElementById('setupStep2Desc').textContent='Deja connecte !';
+    document.getElementById('setupPairCard').innerHTML=`
+      <div class="success-burst"><div style="font-size:64px">&#x2705;</div></div>
+      <div class="setup-pair-name" style="margin-top:16px">${esc(name)}</div>
+      <div class="step-complete-badge">&#x2713; Connecte et pret</div>`;
+    launchConfetti();
+    document.getElementById('setupNext2').disabled=false;
+    document.getElementById('setupDeviceName').textContent=name;
+    if(navigator.vibrate) navigator.vibrate([50,50,50]);
+    return;
+  }
+
+  // Not paired — call real pairing API
+  document.getElementById('setupStep2Desc').textContent='Lancement de l\'appairage...';
+  const pairResult = await api('/api/pair/start', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({identifier: selectedScanDevice.identifier, name: name}),
+  });
+
+  if(!pairResult || pairResult.error){
+    document.getElementById('pairProgress').style.width='30%';
+    document.getElementById('ps2').classList.remove('active');
+    document.getElementById('setupStep2Desc').textContent='Erreur';
+    document.getElementById('setupPairCard').innerHTML=`
+      <div style="font-size:48px;margin-bottom:12px">&#x26A0;</div>
+      <div class="setup-pair-name">${esc(name)}</div>
+      <div class="step-complete-badge" style="background:var(--danger-bg);color:var(--danger)">
+        ${esc(pairResult?.error||'Appareil introuvable')}
+      </div>
+      <button class="ob-btn ob-btn-ghost" style="margin-top:16px" onclick="setupGoTo(1)">Reessayer</button>
+      <button class="ob-btn ob-btn-ghost" style="margin-top:8px" onclick="skipPairing()">Passer</button>`;
+    return;
+  }
+
+  // Store session ID for PIN submission
+  window._pairSessionId = pairResult.session_id;
+
+  document.getElementById('pairProgress').style.width='50%';
+  document.getElementById('ps2').classList.remove('active');
+  document.getElementById('ps2').classList.add('done');
+  document.getElementById('ps2').querySelector('.pair-stage-icon').textContent='✓';
+
+  // Show PIN input — a real PIN should now appear on the TV
+  document.getElementById('setupStep2Desc').textContent='Regardez votre Apple TV';
+  document.getElementById('setupPairCard').innerHTML=`
+    <div style="font-size:48px;margin-bottom:12px">&#x1F4FA;</div>
+    <div class="setup-pair-name">${esc(name)}</div>
+    <div class="step-complete-badge" style="background:var(--accent-soft);color:var(--accent)">
+      Un code PIN s'affiche sur votre TV
+    </div>
+    <p style="font-size:14px;color:var(--text3);margin:16px 0;line-height:1.5">
+      Entrez le code a <strong>4 chiffres</strong> affiche sur l'ecran de votre Apple TV.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px">
+      <input class="ob-input pin-digit" id="pin1" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(1)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+      <input class="ob-input pin-digit" id="pin2" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(2)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+      <input class="ob-input pin-digit" id="pin3" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(3)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+      <input class="ob-input pin-digit" id="pin4" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(4)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+    </div>
+    <button class="ob-btn ob-btn-primary" onclick="submitPin()">Valider le code</button>
+    <button class="ob-btn ob-btn-ghost" style="margin-top:8px" onclick="cancelPairing()">Annuler</button>
+  `;
+  setTimeout(()=>{const p=document.getElementById('pin1');if(p)p.focus()},200);
+}
+
+function pinNext(n){
+  const val=document.getElementById('pin'+n).value;
+  if(val && n<4) document.getElementById('pin'+(n+1)).focus();
+}
+
+async function cancelPairing(){
+  if(window._pairSessionId){
+    await api('/api/pair/cancel',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({session_id:window._pairSessionId}),
+    });
+    window._pairSessionId=null;
+  }
+  skipPairing();
+}
+
+function launchConfetti(){
+  const container=document.createElement('div');
+  container.className='confetti-container';
+  const colors=['#7c3aed','#6366f1','#3b82f6','#10b981','#f59e0b','#f43f5e','#ec4899','#8b5cf6'];
+  for(let i=0;i<40;i++){
+    const piece=document.createElement('div');
+    piece.className='confetti-piece';
+    piece.style.left=Math.random()*100+'%';
+    piece.style.background=colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDelay=(Math.random()*0.8)+'s';
+    piece.style.animationDuration=(2+Math.random()*1.5)+'s';
+    piece.style.width=(6+Math.random()*6)+'px';
+    piece.style.height=(6+Math.random()*6)+'px';
+    piece.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    container.appendChild(piece);
+  }
+  document.body.appendChild(container);
+  setTimeout(()=>container.remove(),3500);
+}
+
+async function submitPin(){
+  const pin=[1,2,3,4].map(n=>document.getElementById('pin'+n).value).join('');
+  if(pin.length<4){toast('Entrez les 4 chiffres');return;}
+
+  const name=selectedScanDevice?selectedScanDevice.name:'Apple TV';
+
+  // Show progress
+  document.getElementById('setupPairCard').innerHTML=`
+    <div style="font-size:48px;margin-bottom:12px">&#x1F4FA;</div>
+    <div class="setup-pair-name">${esc(name)}</div>
+    <div class="progress-bar"><div class="progress-fill" id="pinProgress" style="width:30%"></div></div>
+    <div class="pair-stages">
+      <div class="pair-stage active"><div class="pair-stage-icon"><div class="spinner-small"></div></div>Envoi du code PIN...</div>
+    </div>`;
+  if(navigator.vibrate) navigator.vibrate(30);
+
+  // Call real API
+  const result = await api('/api/pair/pin',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({session_id:window._pairSessionId, pin:pin}),
+  });
+
+  if(!result){
+    toast('Erreur de connexion');
+    setupGoTo(1); // restart
+    return;
+  }
+
+  if(result.status==='paired_complete'){
+    // Full success
+    document.getElementById('setupStep2Desc').textContent='Appairage reussi !';
+    document.getElementById('setupPairCard').innerHTML=`
+      <div class="success-burst"><div style="font-size:64px">&#x2705;</div></div>
+      <div class="setup-pair-name" style="margin-top:16px">${esc(name)}</div>
+      <div class="step-complete-badge">&#x2713; ${result.protocols.join(' + ')} appaire${result.protocols.length>1?'s':''}</div>`;
+    launchConfetti();
+    if(navigator.vibrate) navigator.vibrate([50,50,50]);
+    await loadDevices();
+    document.getElementById('setupNext2').disabled=false;
+    document.getElementById('setupDeviceName').textContent=name;
+    window._pairSessionId=null;
+
+  }else if(result.status==='paired_partial'){
+    // One protocol done, another needs PIN
+    toast(result.protocol_done+' appaire ! PIN suivant sur la TV...');
+    document.getElementById('setupStep2Desc').textContent='Deuxieme appairage...';
+    document.getElementById('setupPairCard').innerHTML=`
+      <div style="font-size:48px;margin-bottom:12px">&#x1F4FA;</div>
+      <div class="setup-pair-name">${esc(name)}</div>
+      <div class="step-complete-badge" style="background:var(--success-bg);color:var(--success)">
+        &#x2713; ${esc(result.protocol_done)} OK
+      </div>
+      <p style="font-size:14px;color:var(--text3);margin:16px 0;line-height:1.5">
+        Un nouveau code PIN s'affiche sur votre TV<br>pour <strong>${esc(result.next_protocol)}</strong>.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px">
+        <input class="ob-input pin-digit" id="pin1" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(1)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+        <input class="ob-input pin-digit" id="pin2" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(2)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+        <input class="ob-input pin-digit" id="pin3" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(3)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+        <input class="ob-input pin-digit" id="pin4" type="tel" maxlength="1" inputmode="numeric" oninput="pinNext(4)" style="width:56px;height:64px;text-align:center;font-size:28px;font-weight:800;padding:0">
+      </div>
+      <button class="ob-btn ob-btn-primary" onclick="submitPin()">Valider</button>
+      <button class="ob-btn ob-btn-ghost" style="margin-top:8px" onclick="skipPairing()">Passer</button>`;
+    setTimeout(()=>{const p=document.getElementById('pin1');if(p)p.focus()},200);
+
+  }else{
+    // Failed
+    document.getElementById('setupStep2Desc').textContent='Appairage echoue';
+    document.getElementById('setupPairCard').innerHTML=`
+      <div style="font-size:48px;margin-bottom:12px">&#x274C;</div>
+      <div class="setup-pair-name">${esc(name)}</div>
+      <div class="step-complete-badge" style="background:var(--danger-bg);color:var(--danger)">
+        ${esc(result.error||'Code incorrect')}
+      </div>
+      <button class="ob-btn ob-btn-primary" style="margin-top:20px" onclick="setupGoTo(1)">Reessayer</button>
+      <button class="ob-btn ob-btn-ghost" style="margin-top:8px" onclick="skipPairing()">Passer</button>`;
+    window._pairSessionId=null;
+  }
+}
+
+function skipPairing(){
+  document.getElementById('setupNext2').disabled=false;
+  document.getElementById('setupDeviceName').textContent=selectedScanDevice?selectedScanDevice.name:'--';
+  setupGoTo(2);
+}
+
+/* ── Step 3: Notifications ── */
+let setupNotifChoice='on';
+
+function selectNotifOption(el,val){
+  document.querySelectorAll('.notif-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.classList.remove('select-flash');
+  void el.offsetWidth;
+  el.classList.add('select-flash');
+  if(navigator.vibrate) navigator.vibrate(20);
+  setupNotifChoice=val;
+}
+
+function setupNotifContinue(){
+  if(setupNotifChoice==='on'){
+    // Request browser notification permission
+    if('Notification' in window && Notification.permission==='default'){
+      Notification.requestPermission().then(p=>{
+        if(p==='granted') toast('Notifications activees');
+      });
+    }
+    // Also save ntfy preference
+    api('/api/settings',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({notifications_enabled:'true'})
+    });
+  }
+  setupGoTo(3);
+}
+
+/* ── Step 4: Shabbat mode ── */
+async function setupLoadShabbat(){
+  if(shabbatData){
+    document.getElementById('setupCandle').textContent=fmtTime(shabbatData.candle_lighting);
+    document.getElementById('setupHavdalah').textContent=fmtTime(shabbatData.havdalah);
+  }
+  if(selectedScanDevice){
+    document.getElementById('setupDeviceName').textContent=selectedScanDevice.name;
+  }
+}
+
+function toggleMegaShabbat(){
+  megaShabbatOn=!megaShabbatOn;
+  const el=document.getElementById('megaToggle');
+  const label=document.getElementById('megaLabel');
+  const pill=document.getElementById('setupStatusPill');
+
+  if(megaShabbatOn){
+    el.classList.add('on');
+    label.textContent='Active';
+    pill.classList.add('active-pill');
+    pill.innerHTML='<span class="setup-status-dot"></span> Mode Shabbat active';
+    launchConfetti();
+    if(navigator.vibrate) navigator.vibrate([50,30,50,30,100]);
+    devices.forEach(d=>{
+      if(!d.script_running) toggleDev(d.id,true);
+    });
+  }else{
+    el.classList.remove('on');
+    label.textContent='Activer';
+    pill.classList.remove('active-pill');
+    pill.innerHTML='<span class="setup-status-dot"></span> En attente de Shabbat';
+    devices.forEach(d=>{
+      if(d.script_running) toggleDev(d.id,false);
+    });
+  }
+}
+
+function setupFinish(){
+  localStorage.setItem('shabbat_setup_done','1');
+  const w=document.getElementById('setupWizard');
+  w.classList.add('hiding');
+  setTimeout(()=>w.classList.add('setup-hidden'),500);
+  loadDevices();
+}
+
+/* ── Notifications settings ── */
+async function saveNotifPrefs(){
+  const prefs={};
+  document.querySelectorAll('[data-notif]').forEach(el=>{
+    prefs['notif_'+el.dataset.notif]=el.checked?'true':'false';
+  });
+  await api('/api/settings',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(prefs)
+  });
+  toast('Preferences enregistrees');closeSheet();
+}
+
+/* ── Init ── */
+async function init(){
+  currentUser=getUser();
+
+  if(!currentUser){
+    // First launch — show onboarding
+    const ob=document.getElementById('onboarding');
+    ob.classList.remove('onboarding-hidden');
+    obGoTo(0);
+  }else{
+    updateAvatar();
+    updateProfileSheet();
+    // Check if setup is done
+    if(!localStorage.getItem('shabbat_setup_done')){
+      showSetup();
+    }
+  }
+
+  await Promise.all([loadShabbat(),loadDevices()]);
+  connectWS();
+  setInterval(loadDevices,30000);
+  setInterval(()=>{loadShabbat();updateHeroBottom()},60000);
+}
+
+init();
+</script>
+</body>
+</html>
