@@ -4,3 +4,5 @@ __pycache__/
 logs/
 _archive/
 .claude/
+node_modules/
+.expo/
