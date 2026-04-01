@@ -12,6 +12,11 @@ import HomeScreen from '../screens/home/HomeScreen';
 import ZmanimScreen from '../screens/home/ZmanimScreen';
 import HolidaysScreen from '../screens/home/HolidaysScreen';
 import ProfileScreen from '../screens/settings/ProfileScreen';
+import AddDeviceScreen from '../screens/home/AddDeviceScreen';
+import ScheduleScreen from '../screens/home/ScheduleScreen';
+import StatsScreen from '../screens/home/StatsScreen';
+import NotificationsScreen from '../screens/settings/NotificationsScreen';
+import SetupWizardScreen from '../screens/setup/SetupWizardScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -111,6 +116,72 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Profile"
               component={ProfileScreen}
+              options={{
+                headerShown: true,
+                title: '',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="AddDevice"
+              component={AddDeviceScreen}
+              options={{
+                headerShown: true,
+                title: 'Apple TV',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="Schedule"
+              component={ScheduleScreen}
+              options={{
+                headerShown: true,
+                title: 'Schedule',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="Stats"
+              component={StatsScreen}
+              options={{
+                headerShown: true,
+                title: 'Stats',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={{
+                headerShown: true,
+                title: 'Notifications',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="Holidays"
+              component={HolidaysScreen}
+              options={{
+                headerShown: true,
+                title: '',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="SetupWizard"
+              component={SetupWizardScreen}
               options={{
                 headerShown: true,
                 title: '',

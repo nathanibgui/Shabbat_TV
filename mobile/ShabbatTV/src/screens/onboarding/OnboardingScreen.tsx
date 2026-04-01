@@ -14,12 +14,11 @@ import { useStore } from '../../hooks/useStore';
 import { radius } from '../../theme';
 import { createProfile, saveProfile } from '../../services/local-profile';
 
-const { width } = Dimensions.get('window');
-
 type Slide = 'welcome' | 'how' | 'auth' | 'gender' | 'ready';
 const SLIDES: Slide[] = ['welcome', 'how', 'auth', 'gender', 'ready'];
 
 export default function OnboardingScreen() {
+  const { width } = Dimensions.get('window');
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { setAuth, setOnboardingComplete, updateProfile, profile } = useStore();

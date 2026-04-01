@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Switch,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
@@ -86,7 +87,8 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  const styles = makeStyles(theme, isDark);
+  const { width } = Dimensions.get('window');
+  const styles = makeStyles(theme, isDark, width);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -210,7 +212,7 @@ export default function HomeScreen({ navigation }: any) {
 
               <TouchableOpacity
                 style={[styles.editBtn, { backgroundColor: theme.bg }]}
-                onPress={() => navigation.navigate('DeviceSettings', { device })}
+                onPress={() => navigation.navigate('AddDevice')}
               >
                 <Text style={[styles.editBtnText, { color: theme.text2 }]}>{t('home.edit')}</Text>
               </TouchableOpacity>
@@ -255,7 +257,7 @@ export default function HomeScreen({ navigation }: any) {
 
           <TouchableOpacity
             style={[styles.bentoCard, { backgroundColor: theme.card }]}
-            onPress={() => navigation.navigate('Zmanim')}
+            onPress={() => navigation.navigate('Main', { screen: 'ZmanimTab' })}
           >
             <View style={[styles.bentoIcon, { backgroundColor: '#f59e0b' }]}>
               <Text style={styles.bentoIconText}>🕐</Text>
@@ -269,7 +271,7 @@ export default function HomeScreen({ navigation }: any) {
   );
 }
 
-const makeStyles = (theme: any, isDark: boolean) =>
+const makeStyles = (theme: any, isDark: boolean, width: number) =>
   StyleSheet.create({
     container: { flex: 1 },
     header: {

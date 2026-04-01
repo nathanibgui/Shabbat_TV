@@ -6,3 +6,4 @@ _archive/
 .claude/
 node_modules/
 .expo/
+.mobile/
