@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useStore } from '../../hooks/useStore';
@@ -10,7 +10,8 @@ import i18n from '../../i18n';
 export default function ProfileScreen({ navigation }: any) {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { profile, updateProfile, logout, colorScheme, setColorScheme } = useStore();
+  const { profile, updateProfile, logout, colorScheme, setColorScheme, hubIp, setHubIp } = useStore();
+  const [ipInput, setIpInput] = useState(hubIp || '');
 
   const handleTraditionChange = async (tradition: 'ashkenazi' | 'sephardi') => {
     const havdalah_minutes = tradition === 'sephardi' ? 72 : 42;
@@ -110,35 +111,92 @@ export default function ProfileScreen({ navigation }: any) {
         ))}
       </View>
 
-      {/* Menu items */}
+      {/* Hub IP Configuration */}
+      <Text style={[styles.sectionLabel, { color: theme.text3 }]}>Hub (Raspberry Pi)</Text>
+      <View style={[styles.hubRow, { backgroundColor: theme.card }]}>
+        <TextInput
+          style={[styles.hubInput, { color: theme.text }]}
+          value={ipInput}
+          onChangeText={setIpInput}
+          placeholder="192.168.1.x"
+          placeholderTextColor={theme.text4}
+          keyboardType="numeric"
+        />
+        <TouchableOpacity
+          style={[styles.hubSaveBtn, { backgroundColor: theme.accent }]}
+          onPress={() => { setHubIp(ipInput.trim()); Alert.alert('', 'Hub IP enregistree'); }}
+        >
+          <Text style={styles.hubSaveBtnText}>OK</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Menu items — same as web */}
+      <TouchableOpacity
+        style={[styles.menuItem, { backgroundColor: theme.card }]}
+        onPress={() => navigation.navigate('City')}
+      >
+        <View style={styles.menuLeft}>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(251,191,36,0.1)' }]}>
+            <Text>🌍</Text>
+          </View>
+          <View>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Ma ville</Text>
+            <Text style={[styles.menuSub, { color: theme.text3 }]}>Horaires Shabbat locaux</Text>
+          </View>
+        </View>
+        <Text style={[styles.menuArrow, { color: theme.text4 }]}>›</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.menuItem, { backgroundColor: theme.card }]}
+        onPress={() => navigation.navigate('Stats')}
+      >
+        <View style={styles.menuLeft}>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(244,63,94,0.08)' }]}>
+            <Text>❤</Text>
+          </View>
+          <View>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Mes statistiques</Text>
+            <Text style={[styles.menuSub, { color: theme.text3 }]}>Historique et relances</Text>
+          </View>
+        </View>
+        <Text style={[styles.menuArrow, { color: theme.text4 }]}>›</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={[styles.menuItem, { backgroundColor: theme.card }]}
         onPress={() => navigation.navigate('Notifications')}
       >
         <View style={styles.menuLeft}>
-          <View style={[styles.menuIcon, { backgroundColor: theme.accentSoft }]}>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(124,58,237,0.08)' }]}>
             <Text>🔔</Text>
           </View>
-          <Text style={[styles.menuTitle, { color: theme.text }]}>{t('profile.notifications')}</Text>
+          <View>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Notifications</Text>
+            <Text style={[styles.menuSub, { color: theme.text3 }]}>Alertes push</Text>
+          </View>
         </View>
         <Text style={[styles.menuArrow, { color: theme.text4 }]}>›</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.menuItem, { backgroundColor: theme.card }]}
-        onPress={() => navigation.navigate('Holidays')}
+        onPress={() => navigation.navigate('Help')}
       >
         <View style={styles.menuLeft}>
-          <View style={[styles.menuIcon, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-            <Text>📅</Text>
+          <View style={[styles.menuIcon, { backgroundColor: 'rgba(96,165,250,0.1)' }]}>
+            <Text>❓</Text>
           </View>
-          <Text style={[styles.menuTitle, { color: theme.text }]}>{t('holidays.title')}</Text>
+          <View>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Aide</Text>
+            <Text style={[styles.menuSub, { color: theme.text3 }]}>Comment ca marche</Text>
+          </View>
         </View>
         <Text style={[styles.menuArrow, { color: theme.text4 }]}>›</Text>
       </TouchableOpacity>
 
       {/* Version */}
-      <Text style={[styles.version, { color: theme.text4 }]}>{t('profile.version')} 1.0.0</Text>
+      <Text style={[styles.version, { color: theme.text4 }]}>Version 1.0.0</Text>
 
       {/* Logout */}
       <TouchableOpacity style={[styles.logoutBtn, { borderColor: theme.dangerBg }]} onPress={handleLogout}>
@@ -182,6 +240,11 @@ const makeStyles = (theme: any) =>
     menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     menuIcon: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
     menuTitle: { fontSize: 14, fontWeight: '600' },
+    menuSub: { fontSize: 12, marginTop: 1 },
+    hubRow: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.sm, padding: 6, paddingLeft: 16, marginBottom: 24, gap: 8 },
+    hubInput: { flex: 1, fontSize: 15, fontWeight: '500', paddingVertical: 8 },
+    hubSaveBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: radius.xs },
+    hubSaveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
     menuArrow: { fontSize: 20, fontWeight: '600' },
     version: { textAlign: 'center', fontSize: 12, fontWeight: '600', marginTop: 24, marginBottom: 16 },
     logoutBtn: {

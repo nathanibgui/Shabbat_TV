@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useStore } from '../../hooks/useStore';
@@ -56,34 +56,30 @@ export default function NotificationsScreen() {
     }
   };
 
-  const ITEMS: { key: keyof NotifPrefs; emoji: string; titleKey: string; descKey: string }[] = [
-    { key: 'shabbat_start', emoji: '🕯️', titleKey: 'notif.shabbat_entry', descKey: 'notif.shabbat_entry_desc' },
-    { key: 'shabbat_end', emoji: '✨', titleKey: 'notif.shabbat_end', descKey: 'notif.shabbat_end_desc' },
-    { key: 'candle_reminder', emoji: '⏰', titleKey: 'notif.candle_reminder', descKey: 'notif.candle_reminder_desc' },
-    { key: 'relaunch_alert', emoji: '🔄', titleKey: 'notif.relaunch', descKey: 'notif.relaunch_desc' },
-    { key: 'error_alert', emoji: '⚠️', titleKey: 'notif.errors', descKey: 'notif.errors_desc' },
+  const ITEMS: { key: keyof NotifPrefs; emoji: string; title: string; desc: string; iconBg: string }[] = [
+    { key: 'shabbat_start', emoji: '🕯', title: 'Entree de Shabbat', desc: 'Rappel avant l\'allumage des bougies', iconBg: 'rgba(251,191,36,0.1)' },
+    { key: 'shabbat_end', emoji: '⭐', title: 'Fin de Shabbat', desc: 'Resume apres havdalah', iconBg: 'rgba(96,165,250,0.1)' },
+    { key: 'relaunch_alert', emoji: '🔄', title: 'Relances automatiques', desc: 'Chaque fois que la lecture est relancee', iconBg: 'rgba(124,58,237,0.08)' },
+    { key: 'error_alert', emoji: '⚠️', title: 'Erreurs et deconnexions', desc: 'Si un appareil perd la connexion', iconBg: 'rgba(239,68,68,0.08)' },
+    { key: 'candle_reminder', emoji: '✅', title: 'Connexion reussie', desc: 'Quand l\'Apple TV est connectee', iconBg: 'rgba(16,185,129,0.1)' },
   ];
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.bg }]} contentContainerStyle={styles.content}>
-      <Text style={[styles.title, { color: theme.text }]}>{t('notif.title', 'Notifications')}</Text>
+      <Text style={[styles.title, { color: theme.text }]}>Notifications</Text>
       <Text style={[styles.subtitle, { color: theme.text3 }]}>
-        {t('notif.subtitle', 'Choose which notifications you want to receive.')}
+        Choisissez les alertes que vous souhaitez recevoir.
       </Text>
 
       {ITEMS.map((item) => (
         <View key={item.key} style={[styles.card, { backgroundColor: theme.card }]}>
           <View style={styles.cardLeft}>
-            <View style={[styles.iconBox, { backgroundColor: theme.accentSoft }]}>
+            <View style={[styles.iconBox, { backgroundColor: item.iconBg }]}>
               <Text style={styles.iconEmoji}>{item.emoji}</Text>
             </View>
             <View style={styles.cardText}>
-              <Text style={[styles.cardTitle, { color: theme.text }]}>
-                {t(item.titleKey, item.titleKey)}
-              </Text>
-              <Text style={[styles.cardDesc, { color: theme.text3 }]}>
-                {t(item.descKey, item.descKey)}
-              </Text>
+              <Text style={[styles.cardTitle, { color: theme.text }]}>{item.title}</Text>
+              <Text style={[styles.cardDesc, { color: theme.text3 }]}>{item.desc}</Text>
             </View>
           </View>
           <Switch
@@ -94,6 +90,25 @@ export default function NotificationsScreen() {
           />
         </View>
       ))}
+
+      <TouchableOpacity
+        style={[styles.saveBtn, { backgroundColor: theme.accent }]}
+        onPress={async () => {
+          if (hubIp) {
+            try {
+              const hub = new HubAPI(hubIp);
+              const settings: Record<string, string> = {};
+              for (const key of Object.keys(prefs) as (keyof NotifPrefs)[]) {
+                settings[key] = prefs[key] ? '1' : '0';
+              }
+              await hub.updateSettings(settings);
+            } catch {}
+          }
+          Alert.alert('', 'Preferences enregistrees');
+        }}
+      >
+        <Text style={styles.saveBtnText}>Enregistrer</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -113,4 +128,6 @@ const styles = StyleSheet.create({
   cardText: { flex: 1 },
   cardTitle: { fontSize: 14, fontWeight: '700' },
   cardDesc: { fontSize: 12, marginTop: 2, lineHeight: 17 },
+  saveBtn: { paddingVertical: 16, borderRadius: 18, alignItems: 'center', marginTop: 20 },
+  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

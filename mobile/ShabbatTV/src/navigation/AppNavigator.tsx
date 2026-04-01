@@ -17,6 +17,9 @@ import ScheduleScreen from '../screens/home/ScheduleScreen';
 import StatsScreen from '../screens/home/StatsScreen';
 import NotificationsScreen from '../screens/settings/NotificationsScreen';
 import SetupWizardScreen from '../screens/setup/SetupWizardScreen';
+import DeviceSettingsScreen from '../screens/home/DeviceSettingsScreen';
+import CityScreen from '../screens/settings/CityScreen';
+import HelpScreen from '../screens/settings/HelpScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -185,6 +188,39 @@ export default function AppNavigator() {
               options={{
                 headerShown: true,
                 title: '',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="DeviceSettings"
+              component={DeviceSettingsScreen}
+              options={{
+                headerShown: true,
+                title: 'Appareil',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="City"
+              component={CityScreen}
+              options={{
+                headerShown: true,
+                title: 'Ma ville',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="Help"
+              component={HelpScreen}
+              options={{
+                headerShown: true,
+                title: 'Aide',
                 headerBackTitle: 'Retour',
                 headerStyle: { backgroundColor: theme.bg },
                 headerTintColor: theme.accent,

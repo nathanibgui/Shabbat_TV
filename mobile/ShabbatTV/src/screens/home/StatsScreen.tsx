@@ -44,9 +44,10 @@ export default function StatsScreen() {
     setLoading(false);
   };
 
-  const relaunches = stats?.by_type?.['select'] || 0;
-  const reconnections = stats?.by_type?.['reconnect'] || 0;
   const shabbatsTracked = history.length;
+  const relaunches = stats?.by_type?.['select'] || 0;
+  const reconnections = stats?.by_type?.['connection'] || 0;
+  const errors = stats?.by_type?.['error'] || 0;
 
   const formatTime = (iso: string) => {
     if (!iso) return '--:--';
@@ -56,23 +57,28 @@ export default function StatsScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.bg }]} contentContainerStyle={styles.content}>
-      <Text style={[styles.title, { color: theme.text }]}>{t('stats.title')}</Text>
+      <Text style={[styles.title, { color: theme.text }]}>Statistiques</Text>
 
-      {/* Stats cards */}
+      {/* Stats cards — 2x2 like web */}
       <View style={styles.statsRow}>
         <View style={[styles.statCard, { backgroundColor: theme.card }]}>
-          <Text style={styles.statBig}>{relaunches}</Text>
-          <Text style={[styles.statLabel, { color: theme.text3 }]}>{t('stats.total_relaunches')}</Text>
+          <Text style={styles.statBig}>{shabbatsTracked}</Text>
+          <Text style={[styles.statLabel, { color: theme.text3 }]}>Shabbats geres</Text>
         </View>
         <View style={[styles.statCard, { backgroundColor: theme.card }]}>
-          <Text style={styles.statBig}>{reconnections}</Text>
-          <Text style={[styles.statLabel, { color: theme.text3 }]}>{t('stats.total_reconnections')}</Text>
+          <Text style={styles.statBig}>{relaunches}</Text>
+          <Text style={[styles.statLabel, { color: theme.text3 }]}>Relances auto</Text>
         </View>
       </View>
-
-      <View style={[styles.statCardFull, { backgroundColor: theme.card }]}>
-        <Text style={styles.statBig}>{shabbatsTracked}</Text>
-        <Text style={[styles.statLabel, { color: theme.text3 }]}>{t('stats.shabbats_tracked')}</Text>
+      <View style={styles.statsRow}>
+        <View style={[styles.statCard, { backgroundColor: theme.card }]}>
+          <Text style={styles.statBig}>{reconnections}</Text>
+          <Text style={[styles.statLabel, { color: theme.text3 }]}>Reconnexions</Text>
+        </View>
+        <View style={[styles.statCard, { backgroundColor: theme.card }]}>
+          <Text style={styles.statBig}>{errors}</Text>
+          <Text style={[styles.statLabel, { color: theme.text3 }]}>Erreurs</Text>
+        </View>
       </View>
 
       {/* History */}
@@ -107,7 +113,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 16, paddingTop: Platform.OS === 'ios' ? 60 : 16, paddingBottom: 100 },
   title: { fontSize: 22, fontWeight: '800', letterSpacing: -0.4, marginBottom: 20 },
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
+  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 10 } as any,
   statCard: {
     flex: 1, padding: 20, borderRadius: radius.sm, alignItems: 'center',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,

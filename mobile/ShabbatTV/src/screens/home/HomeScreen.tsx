@@ -96,18 +96,27 @@ export default function HomeScreen({ navigation }: any) {
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <View style={styles.logo}>
           <View style={styles.logoIcon}>
-            <Text style={styles.logoEmoji}>🕯️</Text>
+            <Text style={styles.logoEmoji}>✡</Text>
           </View>
-          <Text style={[styles.logoText, { color: theme.text }]}>ShabbatTV</Text>
+          <Text style={[styles.logoText, { color: theme.text }]}>Shabbat TV</Text>
         </View>
-        <TouchableOpacity
-          style={[styles.avatarBtn, { backgroundColor: theme.accent }]}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Text style={styles.avatarText}>
-            {profile?.first_name?.[0]?.toUpperCase() || '?'}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          {/* Connection pill */}
+          <View style={[styles.connPill, { backgroundColor: hubStatus === 'online' ? theme.successBg : theme.dangerBg }]}>
+            <View style={[styles.connDot, { backgroundColor: hubStatus === 'online' ? theme.success : theme.danger }]} />
+            <Text style={[styles.connLabel, { color: hubStatus === 'online' ? theme.success : theme.danger }]}>
+              {hubStatus === 'online' ? '' : 'Hors connexion'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.avatarBtn, { backgroundColor: theme.accent }]}
+            onPress={() => navigation.navigate('Profile')}
+          >
+            <Text style={styles.avatarText}>
+              {profile?.first_name?.[0]?.toUpperCase() || '?'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -172,15 +181,15 @@ export default function HomeScreen({ navigation }: any) {
               ]}
             >
               <View style={styles.devTop}>
-                <View style={styles.devLeft}>
+                <TouchableOpacity style={styles.devLeft} onPress={() => navigation.navigate('DeviceSettings', { device })}>
                   <View style={[styles.devAvatar, device.script_running && styles.devAvatarActive]}>
                     <Text style={styles.devAvatarEmoji}>📺</Text>
                   </View>
                   <View>
                     <Text style={[styles.devName, { color: theme.text }]}>{device.name}</Text>
-                    <Text style={[styles.devSubtitle, { color: theme.text3 }]}>{device.address}</Text>
+                    <Text style={[styles.devSubtitle, { color: theme.text3 }]}>Apple TV · Modifier ✏</Text>
                   </View>
-                </View>
+                </TouchableOpacity>
                 <Switch
                   value={device.script_running}
                   onValueChange={() => handleToggleDevice(device.id, device.script_running)}
@@ -212,9 +221,9 @@ export default function HomeScreen({ navigation }: any) {
 
               <TouchableOpacity
                 style={[styles.editBtn, { backgroundColor: theme.bg }]}
-                onPress={() => navigation.navigate('AddDevice')}
+                onPress={() => navigation.navigate('DeviceSettings', { device })}
               >
-                <Text style={[styles.editBtnText, { color: theme.text2 }]}>{t('home.edit')}</Text>
+                <Text style={[styles.editBtnText, { color: theme.text2 }]}>Modifier</Text>
               </TouchableOpacity>
             </View>
           ))
@@ -229,8 +238,8 @@ export default function HomeScreen({ navigation }: any) {
             <View style={[styles.bentoIcon, { backgroundColor: theme.accent }]}>
               <Text style={styles.bentoIconText}>+</Text>
             </View>
-            <Text style={[styles.bentoTitle, { color: theme.text }]}>{t('home.add_device')}</Text>
-            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>{t('home.add_device_desc')}</Text>
+            <Text style={[styles.bentoTitle, { color: theme.text }]}>Ajouter un appareil</Text>
+            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>Detecter une Apple TV</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -240,8 +249,8 @@ export default function HomeScreen({ navigation }: any) {
             <View style={[styles.bentoIcon, { backgroundColor: '#3b82f6' }]}>
               <Text style={styles.bentoIconText}>⏰</Text>
             </View>
-            <Text style={[styles.bentoTitle, { color: theme.text }]}>{t('home.schedule')}</Text>
-            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>{t('home.schedule_desc')}</Text>
+            <Text style={[styles.bentoTitle, { color: theme.text }]}>Programmer</Text>
+            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>Mode automatique</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -251,19 +260,19 @@ export default function HomeScreen({ navigation }: any) {
             <View style={[styles.bentoIcon, { backgroundColor: '#ec4899' }]}>
               <Text style={styles.bentoIconText}>📊</Text>
             </View>
-            <Text style={[styles.bentoTitle, { color: theme.text }]}>{t('home.stats')}</Text>
-            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>{t('home.stats_desc')}</Text>
+            <Text style={[styles.bentoTitle, { color: theme.text }]}>Statistiques</Text>
+            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>Mes Shabbats</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.bentoCard, { backgroundColor: theme.card }]}
-            onPress={() => navigation.navigate('Main', { screen: 'ZmanimTab' })}
+            onPress={() => navigation.navigate('City')}
           >
             <View style={[styles.bentoIcon, { backgroundColor: '#f59e0b' }]}>
-              <Text style={styles.bentoIconText}>🕐</Text>
+              <Text style={styles.bentoIconText}>🌍</Text>
             </View>
-            <Text style={[styles.bentoTitle, { color: theme.text }]}>{t('zmanim.title')}</Text>
-            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>{t('home.city_desc')}</Text>
+            <Text style={[styles.bentoTitle, { color: theme.text }]}>Ma ville</Text>
+            <Text style={[styles.bentoDesc, { color: theme.text3 }]}>Horaires locaux</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -285,6 +294,10 @@ const makeStyles = (theme: any, isDark: boolean, width: number) =>
     logoIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center' },
     logoEmoji: { fontSize: 19 },
     logoText: { fontSize: 19, fontWeight: '800', letterSpacing: -0.4 },
+    headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    connPill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+    connDot: { width: 7, height: 7, borderRadius: 3.5 },
+    connLabel: { fontSize: 11, fontWeight: '600' },
     avatarBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
     avatarText: { color: '#fff', fontSize: 15, fontWeight: '700' },
     scroll: { flex: 1 },
