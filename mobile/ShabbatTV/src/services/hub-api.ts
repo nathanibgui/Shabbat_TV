@@ -5,6 +5,7 @@ export interface HubDevice {
   name: string;
   address: string;
   identifier: string;
+  device_type?: 'appletv' | 'chromecast' | 'androidtv' | 'firetv' | 'roku' | 'samsung' | 'lg';
   has_credentials: boolean;
   paired_at: string;
   last_seen: string | null;

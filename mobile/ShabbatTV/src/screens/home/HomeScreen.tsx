@@ -283,11 +283,20 @@ export default function HomeScreen({ navigation }: any) {
                         device.script_running && styles.devAvatarActive,
                       ]}
                     >
-                      <Text style={styles.devAvatarEmoji}>📺</Text>
+                      <Text style={styles.devAvatarEmoji}>
+                        {device.device_type === 'chromecast' ? '📡' :
+                         device.device_type === 'firetv' ? '🔥' :
+                         device.device_type === 'roku' ? '🟣' : '📺'}
+                      </Text>
                     </View>
                     <View>
                       <Text style={[styles.devName, { color: theme.text }]}>{device.name}</Text>
-                      <Text style={[styles.devSubtitle, { color: theme.text3 }]}>Apple TV · Modifier ✏</Text>
+                      <Text style={[styles.devSubtitle, { color: theme.text3 }]}>
+                        {device.device_type === 'chromecast' ? 'Chromecast' :
+                         device.device_type === 'androidtv' ? 'Android TV' :
+                         device.device_type === 'firetv' ? 'Fire TV' :
+                         device.device_type === 'roku' ? 'Roku' : 'Apple TV'} · Modifier ✏
+                      </Text>
                     </View>
                   </PressableScale>
                   <Switch
