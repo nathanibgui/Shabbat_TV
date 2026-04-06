@@ -2793,6 +2793,15 @@ function setProfileTradition(val){
   loadShabbat();
 }
 
+function saveHubIp(){
+  const ip=document.getElementById('profilePageHubIp').value.trim();
+  if(ip){
+    localStorage.setItem('shabbat_hub_ip',ip);
+    toast('Hub IP enregistree : '+ip);
+    loadDevices();
+  }
+}
+
 function setProfileLang(val){
   if(!currentUser)return;
   currentUser.language=val;
