@@ -300,7 +300,7 @@ async def get_atv_connection(device):
 
 # ── Script management ─────────────────────────────
 
-_NO_WINDOW = subprocess.CREATE_NO_WINDOW
+_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 
 
 def is_script_running(device_id):
@@ -308,29 +308,20 @@ def is_script_running(device_id):
     if pid_path.exists():
         try:
             pid = int(pid_path.read_text().strip())
-            result = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"],
-                                     capture_output=True, timeout=10,
-                                     creationflags=_NO_WINDOW)
-            if "python" in safe_decode(result.stdout).lower():
+            # Cross-platform process check
+            if sys.platform == 'win32':
+                result = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+                                         capture_output=True, timeout=10,
+                                         creationflags=_NO_WINDOW)
+                if "python" in safe_decode(result.stdout).lower():
+                    return True, pid
+            else:
+                # Linux/Mac: check /proc or use kill -0
+                import signal
+                os.kill(pid, 0)  # Raises OSError if process doesn't exist
                 return True, pid
-        except Exception:
+        except (OSError, Exception):
             pass
-    # Fallback: chercher le process par commandline
-    try:
-        result = subprocess.run(
-            ["powershell", "-Command",
-             f"Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
-             f"Where-Object {{ $_.CommandLine -like '*--device {device_id}*' }} | "
-             f"Select-Object ProcessId -ExpandProperty ProcessId"],
-            capture_output=True, timeout=10,
-            creationflags=_NO_WINDOW)
-        stdout = safe_decode(result.stdout)
-        if stdout.strip():
-            pid = int(stdout.strip().split("\n")[0])
-            pid_path.write_text(str(pid))
-            return True, pid
-    except Exception:
-        pass
     return False, None
 
 
@@ -346,10 +337,10 @@ def start_script(device_id, auto_shabbat=False):
     if ntfy_topic:
         cmd.extend(["--ntfy", ntfy_topic])
     with open(str(log_path), "w", encoding="utf-8") as log_file:
-        proc = subprocess.Popen(
-            cmd, stdout=subprocess.DEVNULL, stderr=log_file,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
+        kwargs = dict(stdout=subprocess.DEVNULL, stderr=log_file)
+        if hasattr(subprocess, 'CREATE_NO_WINDOW'):
+            kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+        proc = subprocess.Popen(cmd, **kwargs)
     get_pid_path(device_id).write_text(str(proc.pid))
     mode = "auto-shabbat" if auto_shabbat else "manuel"
     add_event(device_id, "script", f"Script demarre (PID {proc.pid}, mode: {mode})")
@@ -372,9 +363,13 @@ def stop_script(device_id):
     running, pid = is_script_running(device_id)
     if running and pid:
         try:
-            subprocess.run(["taskkill", "/PID", str(pid), "/F"],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10,
-                            creationflags=_NO_WINDOW)
+            if sys.platform == 'win32':
+                subprocess.run(["taskkill", "/PID", str(pid), "/F"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10,
+                                creationflags=_NO_WINDOW)
+            else:
+                import signal
+                os.kill(pid, signal.SIGTERM)
             get_pid_path(device_id).unlink(missing_ok=True)
             add_event(device_id, "script", f"Script arrete (PID {pid})")
             db_add_event(device_id, "script", f"Script arrete (PID {pid})")
