@@ -804,6 +804,26 @@ body{
   transform:scale(1.02);
 }
 
+.ob-apps-grid{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:380px;
+}
+.ob-app-chip{
+  padding:12px 16px;border-radius:14px;border:1.5px solid rgba(139,92,246,0.1);
+  background:var(--card);cursor:pointer;font-size:14px;font-weight:600;
+  transition:all 0.25s var(--spring);box-shadow:var(--shadow-sm);
+}
+.ob-app-chip:active{transform:scale(0.95)}
+.ob-app-chip.selected{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+  box-shadow:0 4px 16px rgba(124,58,237,0.3);
+}
+
+/* Google popup responsive mobile */
+@media(max-width:500px){
+  .google-popup{width:calc(100% - 16px)!important;padding:24px 16px!important;border-radius:20px 20px 0 0!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;max-width:100%!important}
+  .google-popup-overlay{align-items:flex-end!important}
+}
+
 .ob-choice-icon{
   font-size:48px;
   margin-bottom:10px;
@@ -1818,8 +1838,56 @@ body{
       </div>
     </div>
 
-    <!-- Step 4: Ready -->
+    <!-- Step 4: Tradition -->
     <div class="ob-slide" data-slide="4">
+      <h2 class="ob-title">Votre tradition</h2>
+      <p class="ob-desc" style="margin-bottom:28px">Cela ajuste les horaires de Havdalah selon votre communaute.</p>
+      <div class="ob-choice-grid">
+        <div class="ob-choice-card" onclick="obSelectTradition(this,'sephardi')" data-val="sephardi">
+          <div class="ob-choice-icon">&#x1F54E;</div>
+          <div class="ob-choice-label"><strong>Sefarade</strong><br><span style="font-size:11px;color:var(--text3)">Rabbenou Tam (72 min)</span></div>
+        </div>
+        <div class="ob-choice-card selected" onclick="obSelectTradition(this,'ashkenazi')" data-val="ashkenazi">
+          <div class="ob-choice-icon">&#x2721;</div>
+          <div class="ob-choice-label"><strong>Ashkenaze</strong><br><span style="font-size:11px;color:var(--text3)">Standard (42 min)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: City -->
+    <div class="ob-slide" data-slide="5">
+      <h2 class="ob-title">Votre ville</h2>
+      <p class="ob-desc" style="margin-bottom:24px">Pour calculer les horaires de Shabbat precis.</p>
+      <div style="position:relative;width:100%;max-width:340px">
+        <input type="text" id="obCitySearch" placeholder="Rechercher une ville..." oninput="obSearchCity(this.value)" autocomplete="off"
+          style="width:100%;padding:14px 18px;border-radius:var(--radius-sm);border:1.5px solid var(--accent-soft);font-size:15px;font-family:inherit;background:var(--card);color:var(--text);outline:none;transition:border 0.2s">
+        <div id="obCityResults" style="position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--card);border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow-lg);z-index:10;display:none"></div>
+      </div>
+      <div id="obSelectedCity" style="margin-top:16px;padding:12px 18px;background:var(--success-bg);border-radius:var(--radius-xs);display:none;align-items:center;gap:10px">
+        <span style="font-size:20px">📍</span>
+        <span id="obCityName" style="font-weight:700;color:var(--success)">Paris</span>
+      </div>
+      <p style="margin-top:12px;font-size:13px;color:var(--text4)">Paris est selectionne par defaut</p>
+    </div>
+
+    <!-- Step 6: Streaming Apps -->
+    <div class="ob-slide" data-slide="6">
+      <h2 class="ob-title">Vos applications</h2>
+      <p class="ob-desc" style="margin-bottom:24px">Quelles apps de streaming utilisez-vous ?</p>
+      <div class="ob-apps-grid" id="obAppsGrid">
+        <div class="ob-app-chip" onclick="obToggleApp(this,'netflix')" data-app="netflix">🟥 Netflix</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'youtube')" data-app="youtube">🔴 YouTube</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'disney')" data-app="disney">🏰 Disney+</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'prime')" data-app="prime">📦 Prime Video</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'appletv')" data-app="appletv">🍎 Apple TV+</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'molotov')" data-app="molotov">📡 Molotov</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'mycanal')" data-app="mycanal">🎬 MyCanal</div>
+        <div class="ob-app-chip" onclick="obToggleApp(this,'ocs')" data-app="ocs">🎞️ OCS / Max</div>
+      </div>
+    </div>
+
+    <!-- Step 7: Ready -->
+    <div class="ob-slide" data-slide="7">
       <div class="ob-ready-check">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="32" fill="url(#gcheck)"/>
@@ -1828,21 +1896,25 @@ body{
         </svg>
       </div>
       <h2 class="ob-title" style="margin-top:24px">Tout est pret !</h2>
-      <p class="ob-desc">Ajoutez votre premiere Apple TV et profitez de Shabbat en toute serenite.</p>
+      <p class="ob-desc">Ajoutez votre premier appareil et profitez de Shabbat en toute serenite.</p>
     </div>
 
   </div>
 
   <div class="ob-bottom">
+    <button class="ob-btn ob-btn-ghost" id="obBack" onclick="obBack()" style="display:none">← Retour</button>
     <div class="ob-dots" id="obDots">
       <div class="ob-dot active"></div>
       <div class="ob-dot"></div>
       <div class="ob-dot"></div>
       <div class="ob-dot"></div>
       <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
     </div>
     <button class="ob-btn ob-btn-primary" id="obNext" onclick="obNext()">Continuer</button>
-    <button class="ob-btn ob-btn-ghost" id="obSkip" onclick="obNext()">Passer</button>
+    <button class="ob-btn ob-btn-ghost" id="obSkip" onclick="obNext()" style="display:none">Passer</button>
   </div>
 </div>
 
@@ -2057,6 +2129,26 @@ body{
       <div class="bento-icon i-city">&#x1F30D;</div>
       <div class="bento-title">Ma ville</div>
       <div class="bento-desc">Horaires locaux</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('zmanim')">
+      <div class="bento-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)">&#x1F570;</div>
+      <div class="bento-title">Zmanim</div>
+      <div class="bento-desc">Horaires de priere</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('holidays')">
+      <div class="bento-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">&#x1F4C5;</div>
+      <div class="bento-title">Fetes</div>
+      <div class="bento-desc">Calendrier juif</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('remote')">
+      <div class="bento-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">&#x1F3AE;</div>
+      <div class="bento-title">Telecommande</div>
+      <div class="bento-desc">Controler a distance</div>
+    </div>
+    <div class="bento-card" onclick="openSheet('playlist')">
+      <div class="bento-icon" style="background:linear-gradient(135deg,#8b5cf6,#6366f1)">&#x1F3AC;</div>
+      <div class="bento-title">Playlist</div>
+      <div class="bento-desc">Enchainer les apps</div>
     </div>
   </div>
 
@@ -2300,6 +2392,79 @@ body{
   <button class="btn btn-primary" onclick="saveNotifPrefs()">Enregistrer</button>
 </div>
 
+<!-- Sheet: Zmanim -->
+<div class="sheet" id="sheet-zmanim">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Zmanim — Horaires de priere</div>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:16px" id="zmanimCity">Paris</p>
+  <div id="zmanimList" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+
+<!-- Sheet: Holidays -->
+<div class="sheet" id="sheet-holidays">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Fetes a venir</div>
+  <div id="holidaysList" style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto"></div>
+</div>
+
+<!-- Sheet: Remote Control -->
+<div class="sheet" id="sheet-remote">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Telecommande</div>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:20px">Selectionnez un appareil pour le controler.</p>
+  <div id="remoteDeviceSelect" style="margin-bottom:20px"></div>
+  <div id="remoteBody" style="display:flex;flex-direction:column;align-items:center;gap:12px">
+    <div style="display:flex;justify-content:center"><button class="remote-btn" onclick="sendCmd('up')">▲</button></div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="remote-btn" onclick="sendCmd('left')">◀</button>
+      <button class="remote-btn remote-ok" onclick="sendCmd('select')">OK</button>
+      <button class="remote-btn" onclick="sendCmd('right')">▶</button>
+    </div>
+    <div style="display:flex;justify-content:center"><button class="remote-btn" onclick="sendCmd('down')">▼</button></div>
+    <div style="display:flex;gap:16px;margin-top:16px">
+      <button class="remote-btn remote-sm" onclick="sendCmd('menu')">☰ Menu</button>
+      <button class="remote-btn remote-play" onclick="sendCmd('play_pause')">⏯ Play</button>
+      <button class="remote-btn remote-sm" onclick="sendCmd('home')">🏠 Home</button>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:8px">
+      <button class="remote-btn remote-sm" onclick="sendCmd('volume_down')">🔉</button>
+      <button class="remote-btn remote-sm" onclick="sendCmd('volume_up')">🔊</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Playlist -->
+<div class="sheet" id="sheet-playlist">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Playlist</div>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Preparez l'enchainement de vos apps.</p>
+  <div id="playlistItems" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+  <div id="playlistAddPanel" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+    <button class="ob-app-chip" onclick="playlistAdd('netflix')">🟥 Netflix</button>
+    <button class="ob-app-chip" onclick="playlistAdd('youtube')">🔴 YouTube</button>
+    <button class="ob-app-chip" onclick="playlistAdd('disney')">🏰 Disney+</button>
+    <button class="ob-app-chip" onclick="playlistAdd('prime')">📦 Prime</button>
+    <button class="ob-app-chip" onclick="playlistAdd('appletv')">🍎 Apple TV+</button>
+    <button class="ob-app-chip" onclick="playlistAdd('molotov')">📡 Molotov</button>
+  </div>
+  <div id="playlistSummary" style="display:none;padding:14px;background:var(--accent-soft);border-radius:var(--radius-xs);margin-bottom:16px;text-align:center">
+    <span style="font-weight:800;color:var(--accent)" id="playlistTotal">0 apps</span>
+  </div>
+  <button class="btn btn-primary" onclick="playlistSave()">Sauvegarder</button>
+</div>
+
+<style>
+.remote-btn{
+  width:56px;height:56px;border-radius:50%;border:none;background:var(--card);
+  font-size:20px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
+  transition:all 0.2s var(--spring);color:var(--text);font-family:inherit;
+}
+.remote-btn:active{transform:scale(0.9);box-shadow:var(--shadow-sm)}
+.remote-ok{width:72px;height:72px;background:var(--accent);color:#fff;font-size:16px;box-shadow:0 6px 24px rgba(124,58,237,0.3)}
+.remote-play{background:var(--accent);color:#fff;width:auto;padding:0 20px;border-radius:16px;font-size:14px}
+.remote-sm{width:auto;padding:0 16px;border-radius:16px;font-size:13px;height:44px}
+</style>
+
 <!-- Toast -->
 <div class="toast-wrap"><div class="toast" id="toast"></div></div>
 
@@ -2308,7 +2473,7 @@ let devices=[];
 let ws=null;
 let currentUser=null;
 let obSlide=0;
-const OB_TOTAL=5;
+const OB_TOTAL=8;
 
 async function api(p,o={}){try{const r=await fetch(p,o);return await r.json()}catch{return null}}
 
@@ -2487,47 +2652,46 @@ function obGoTo(idx){
   // Buttons
   const next=document.getElementById('obNext');
   const skip=document.getElementById('obSkip');
+  const back=document.getElementById('obBack');
+  // Back button
+  back.style.display=idx>0?'':'none';
+  // Next/Skip logic per slide
   if(idx===2){
-    // Auth step — hide next/skip, form has its own buttons
-    next.style.display='none';
-    skip.style.display='none';
+    // Auth step — form has its own buttons
+    next.style.display='none';skip.style.display='none';
   }else if(idx===OB_TOTAL-1){
-    // Last step
-    next.style.display='';
-    next.textContent='C\'est parti !';
-    skip.style.display='none';
-  }else if(idx===3){
-    // Gender step
-    next.style.display='';
-    next.textContent='Continuer';
-    skip.style.display='';
-    skip.textContent='Passer';
+    next.style.display='';next.textContent='C\'est parti !';skip.style.display='none';
+  }else if(idx===3||idx===4){
+    // Gender / Tradition — show continue
+    next.style.display='';next.textContent='Continuer';skip.style.display='none';
+  }else if(idx===5){
+    // City
+    next.style.display='';next.textContent='Continuer';skip.style.display='none';
+  }else if(idx===6){
+    // Apps
+    next.style.display='';next.textContent='Continuer';skip.style.display='none';
   }else{
-    next.style.display='';
-    next.textContent='Continuer';
-    skip.style.display='';
-    skip.textContent='Passer';
+    next.style.display='';next.textContent='Continuer';skip.style.display='none';
   }
 }
 
 function obNext(){
-  if(obSlide===2){
-    // Auth step — shouldn't reach here, but skip
-    return;
-  }
+  if(obSlide===2) return; // Auth step has its own buttons
   if(obSlide===3){
-    // Save gender if selected
-    const sel=document.querySelector('.ob-choice-card.selected');
+    // Save gender
+    const sel=document.querySelector('[data-slide="3"] .ob-choice-card.selected');
+    if(sel&&currentUser){currentUser.gender=sel.dataset.val;saveUser(currentUser);}
+  }
+  if(obSlide===4){
+    // Save tradition
+    const sel=document.querySelector('[data-slide="4"] .ob-choice-card.selected');
     if(sel&&currentUser){
-      currentUser.gender=sel.dataset.val;
+      currentUser.tradition=sel.dataset.val;
+      currentUser.havdalah_minutes=sel.dataset.val==='sephardi'?72:42;
       saveUser(currentUser);
     }
   }
-  if(obSlide>=OB_TOTAL-1){
-    // Done!
-    obFinish();
-    return;
-  }
+  if(obSlide>=OB_TOTAL-1){obFinish();return;}
   obGoTo(obSlide+1);
 }
 
@@ -2564,8 +2728,68 @@ function obEmailContinue(){
 }
 
 function obSelectGender(el,val){
-  document.querySelectorAll('.ob-choice-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('[data-slide="3"] .ob-choice-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
+}
+
+function obSelectTradition(el,val){
+  document.querySelectorAll('[data-slide="4"] .ob-choice-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  if(currentUser){
+    currentUser.tradition=val;
+    currentUser.havdalah_minutes=val==='sephardi'?72:42;
+    saveUser(currentUser);
+  }
+}
+
+let obCityTimer=null;
+function obSearchCity(q){
+  clearTimeout(obCityTimer);
+  const res=document.getElementById('obCityResults');
+  if(q.length<2){res.style.display='none';return;}
+  obCityTimer=setTimeout(async()=>{
+    try{
+      const r=await fetch(`https://www.hebcal.com/complete?q=${encodeURIComponent(q)}&limit=6`);
+      const data=await r.json();
+      const cities=(data||[]).filter(i=>i.id&&i.geo==='geoname');
+      if(cities.length===0){res.style.display='none';return;}
+      res.innerHTML=cities.map(c=>`
+        <div onclick="obPickCity(${c.id},'${esc(c.value||c.asciiname)}','${esc(c.country||'')}')"
+          style="padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--accent-soft);transition:background 0.15s"
+          onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background='transparent'">
+          <div style="font-weight:600;font-size:14px">${esc(c.value||c.asciiname)}</div>
+          <div style="font-size:12px;color:var(--text3)">${esc(c.admin1||'')}${c.admin1&&c.country?', ':''}${esc(c.country||'')}</div>
+        </div>`).join('');
+      res.style.display='block';
+    }catch{res.style.display='none';}
+  },300);
+}
+
+function obPickCity(geonameid,name,country){
+  document.getElementById('obCityResults').style.display='none';
+  document.getElementById('obCitySearch').value=name;
+  document.getElementById('obSelectedCity').style.display='flex';
+  document.getElementById('obCityName').textContent=`${name}, ${country}`;
+  if(currentUser){
+    currentUser.geonameid=geonameid;
+    currentUser.city_name=name;
+    saveUser(currentUser);
+  }
+}
+
+function obToggleApp(el,key){
+  el.classList.toggle('selected');
+  if(currentUser){
+    if(!currentUser.streaming_apps)currentUser.streaming_apps=[];
+    const idx=currentUser.streaming_apps.indexOf(key);
+    if(idx>=0)currentUser.streaming_apps.splice(idx,1);
+    else currentUser.streaming_apps.push(key);
+    saveUser(currentUser);
+  }
+}
+
+function obBack(){
+  if(obSlide>0)obGoTo(obSlide-1);
 }
 
 function obFinish(){
@@ -2844,6 +3068,10 @@ function openSheet(name){
   document.getElementById('sheet-'+name).classList.add('open');
   if(name==='add')doScan();
   if(name==='stats')loadStats();
+  if(name==='zmanim')loadZmanim();
+  if(name==='holidays')loadHolidays();
+  if(name==='remote')openRemote();
+  if(name==='playlist')playlistRender();
 }
 
 function closeSheet(){
@@ -3304,6 +3532,155 @@ async function init(){
 
   // Start particles
   initParticles();
+
+  // Load zmanim & holidays in background
+  loadZmanim();
+  loadHolidays();
+}
+
+/* ── Zmanim ── */
+const ZMANIM_LABELS={
+  alotHaShachar:'Alot HaShachar (Aube)',misheyakir:'Misheyakir',sunrise:'Lever du soleil',
+  sofZmanShmaMGA:'Shma (MGA)',sofZmanShmaGRA:'Shma (GRA)',sofZmanTfillaMGA:'Tfila (MGA)',
+  sofZmanTfillaGRA:'Tfila (GRA)',chatzot:'Hatsot (Midi)',minchaGedola:'Minha Guedola',
+  minchaKetana:'Minha Ketana',plagHaMincha:'Plag HaMinha',sunset:'Coucher du soleil',
+  tzeit42min:'Tset HaKokhavim'
+};
+const ZMANIM_ICONS={
+  alotHaShachar:'🌅',misheyakir:'🌄',sunrise:'☀️',sofZmanShmaMGA:'📖',sofZmanShmaGRA:'📖',
+  sofZmanTfillaMGA:'🙏',sofZmanTfillaGRA:'🙏',chatzot:'🕛',minchaGedola:'⏰',
+  minchaKetana:'⏰',plagHaMincha:'🌇',sunset:'🌆',tzeit42min:'⭐'
+};
+
+async function loadZmanim(){
+  const user=getUser();
+  const geo=user?.geonameid||2988507;
+  const city=user?.city_name||'Paris';
+  // Get coordinates from a known city map or use defaults
+  const coords={2988507:{lat:48.8566,lon:2.3522}};
+  const c=coords[geo]||{lat:48.8566,lon:2.3522};
+  const d=new Date().toISOString().substring(0,10);
+  try{
+    const r=await fetch(`https://www.hebcal.com/zmanim?cfg=json&latitude=${c.lat}&longitude=${c.lon}&date=${d}`);
+    const data=await r.json();
+    const times=data.times||{};
+    const el=document.getElementById('zmanimList');
+    document.getElementById('zmanimCity').textContent=city+' — '+new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    el.innerHTML=Object.keys(ZMANIM_LABELS).map(k=>{
+      const t=times[k];if(!t)return'';
+      const time=new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-radius:var(--radius-xs)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">${ZMANIM_ICONS[k]||'⏰'}</span>
+          <span style="font-size:13px;font-weight:600">${ZMANIM_LABELS[k]}</span>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums">${time}</span>
+      </div>`;
+    }).join('');
+  }catch(e){console.error('Zmanim error:',e)}
+}
+
+/* ── Holidays ── */
+async function loadHolidays(){
+  const user=getUser();
+  const geo=user?.geonameid||2988507;
+  const lang=user?.language||'fr';
+  const lgParam=lang==='he'?'he':lang==='fr'?'fr':'s';
+  const year=new Date().getFullYear();
+  try{
+    const r=await fetch(`https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=x&geonameid=${geo}&maj=on&min=on&mod=on&nx=on&mf=on&ss=on&lg=${lgParam}`);
+    const data=await r.json();
+    const now=new Date();
+    const holidays=(data.items||[]).filter(i=>new Date(i.date)>=now).slice(0,20);
+    const catColors={holiday:'#7c3aed',candles:'#f59e0b',havdalah:'#6366f1',parashat:'#10b981',roshchodesh:'#06b6d4',minor:'#8b5cf6',modern:'#3b82f6',fast:'#ef4444'};
+    const catIcons={holiday:'🕎',candles:'🕯️',havdalah:'🌙',parashat:'📜',roshchodesh:'🌑',minor:'📅',modern:'🇮🇱',fast:'🍽️'};
+    const el=document.getElementById('holidaysList');
+    el.innerHTML=holidays.map(h=>{
+      const color=catColors[h.category]||'#7c3aed';
+      const icon=catIcons[h.category]||'📅';
+      const dateStr=new Date(h.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+      return`<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border-radius:var(--radius-xs)">
+        <div style="width:42px;height:42px;border-radius:12px;background:${color}15;display:flex;align-items:center;justify-content:center;font-size:20px">${icon}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700">${esc(h.title)}</div>
+          ${h.hebrew?`<div style="font-size:13px;color:var(--text2);margin-top:1px">${esc(h.hebrew)}</div>`:''}
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">${dateStr}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){console.error('Holidays error:',e)}
+}
+
+/* ── Remote Control ── */
+let remoteDeviceId=null;
+function openRemote(){
+  const el=document.getElementById('remoteDeviceSelect');
+  if(devices.length===0){el.innerHTML='<p style="color:var(--text3);font-size:13px">Aucun appareil connecte</p>';return;}
+  el.innerHTML=devices.map(d=>`
+    <button onclick="remoteDeviceId=${d.id};document.querySelectorAll('.remote-dev-btn').forEach(b=>b.style.background='var(--card)');this.style.background='var(--accent-soft)'"
+      class="remote-dev-btn" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-xs);border:none;background:var(--card);cursor:pointer;width:100%;font-family:inherit;text-align:left;margin-bottom:6px;transition:all 0.2s">
+      <span style="font-size:22px">📺</span>
+      <span style="font-weight:600;font-size:14px">${esc(d.name)}</span>
+    </button>`).join('');
+  if(devices.length===1)remoteDeviceId=devices[0].id;
+}
+
+async function sendCmd(cmd){
+  if(!remoteDeviceId){toast('Selectionnez un appareil','info');return;}
+  try{
+    await api(`/api/command/${remoteDeviceId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})});
+    if(navigator.vibrate)navigator.vibrate(20);
+  }catch{toast('Erreur commande','error');}
+}
+
+/* ── Playlist ── */
+let playlistData=[];
+const APP_NAMES={netflix:'Netflix',youtube:'YouTube',disney:'Disney+',prime:'Prime Video',appletv:'Apple TV+',molotov:'Molotov',mycanal:'MyCanal',ocs:'OCS/Max'};
+const APP_EMOJIS={netflix:'🟥',youtube:'🔴',disney:'🏰',prime:'📦',appletv:'🍎',molotov:'📡',mycanal:'🎬',ocs:'🎞️'};
+
+function playlistAdd(key){
+  playlistData.push({key,duration:120});
+  playlistRender();
+}
+
+function playlistRemove(idx){
+  playlistData.splice(idx,1);
+  playlistRender();
+}
+
+function playlistSetDuration(idx,min){
+  playlistData[idx].duration=min;
+  playlistRender();
+}
+
+function playlistRender(){
+  const el=document.getElementById('playlistItems');
+  const sum=document.getElementById('playlistSummary');
+  if(playlistData.length===0){el.innerHTML='<p style="text-align:center;color:var(--text3);padding:20px">Playlist vide</p>';sum.style.display='none';return;}
+  el.innerHTML=playlistData.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border-radius:var(--radius-xs)">
+      <span style="font-weight:900;color:var(--accent)">${i+1}</span>
+      <span style="font-size:22px">${APP_EMOJIS[p.key]||'📺'}</span>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${APP_NAMES[p.key]||p.key}</div>
+        <div style="display:flex;gap:4px;margin-top:4px">
+          ${[60,120,180].map(d=>`<button onclick="playlistSetDuration(${i},${d})" style="padding:3px 8px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;${p.duration===d?'background:var(--accent);color:#fff':'background:var(--accent-soft);color:var(--accent)'}">${d/60}h</button>`).join('')}
+        </div>
+      </div>
+      <button onclick="playlistRemove(${i})" style="border:none;background:none;color:var(--danger);font-size:18px;cursor:pointer;font-weight:700">✕</button>
+    </div>`).join('');
+  const totalMin=playlistData.reduce((s,p)=>s+p.duration,0);
+  const h=Math.floor(totalMin/60),m=totalMin%60;
+  document.getElementById('playlistTotal').textContent=`${playlistData.length} apps — ${h}h${m>0?m+'min':''}`;
+  sum.style.display='block';
+}
+
+function playlistSave(){
+  if(playlistData.length===0){toast('Ajoutez au moins une app','info');return;}
+  // Save to localStorage
+  localStorage.setItem('shabbat_playlist',JSON.stringify(playlistData));
+  toast('Playlist sauvegardee !');
+  closeSheet();
 }
 
 /* ── Floating particles background ── */
