@@ -3224,12 +3224,31 @@ function getCountdown(isoCandle, isoHavdalah){
 let shabbatData=null;
 
 async function loadShabbat(){
+  // Try local hub first, fallback to Hebcal API directly
   const d=await api('/api/shabbat');
-  if(!d)return;
-  shabbatData=d;
-  document.getElementById('parasha').textContent=d.parasha||'';
-  document.getElementById('tCandle').textContent=fmtTime(d.candle_lighting);
-  document.getElementById('tHavdalah').textContent=fmtTime(d.havdalah);
+  if(d&&d.candle_lighting){
+    shabbatData=d;
+  }else{
+    // Direct Hebcal API call (no backend needed)
+    const user=getUser();
+    const geo=user?.geonameid||2988507;
+    const lang=user?.language||'fr';
+    const lgParam=lang==='he'?'he':lang==='fr'?'fr':'s';
+    try{
+      const r=await fetch(`https://www.hebcal.com/shabbat?cfg=json&geonameid=${geo}&M=on&lg=${lgParam}`);
+      const data=await r.json();
+      const result={candle_lighting:null,havdalah:null,parasha:null};
+      for(const item of data.items||[]){
+        if(item.category==='candles')result.candle_lighting=item.date;
+        else if(item.category==='havdalah')result.havdalah=item.date;
+        else if(item.category==='parashat')result.parasha=item.title;
+      }
+      shabbatData=result;
+    }catch{return;}
+  }
+  document.getElementById('parasha').textContent=shabbatData.parasha||'';
+  document.getElementById('tCandle').textContent=fmtTime(shabbatData.candle_lighting);
+  document.getElementById('tHavdalah').textContent=fmtTime(shabbatData.havdalah);
   updateHeroBottom();
 }
 
@@ -3256,10 +3275,12 @@ async function loadDevices(){
   const lab=document.getElementById('sLabel');
 
   if(!data){
-    dot.classList.add('off');lab.textContent='Hors connexion';
+    // No hub available — show friendly message (not "hors connexion")
+    dot.classList.remove('off');lab.textContent='';
     document.getElementById('deviceList').innerHTML=`
-      <div class="empty"><div class="empty-icon">&#x1F4E1;</div>
-      <h3>Vous etes hors connexion</h3><p>Verifiez votre connexion Wi-Fi et reessayez</p></div>`;
+      <div class="empty"><div class="empty-icon">&#x1F4FA;</div>
+      <h3>Aucun appareil configure</h3><p>Ajoutez votre premiere Apple TV pour commencer</p>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="openSheet('add')">+ Ajouter un appareil</button></div>`;
     return;
   }
 
@@ -3534,11 +3555,16 @@ function closeSheet(){
 
 /* ── WebSocket ── */
 function connectWS(){
-  const p=location.protocol==='https:'?'wss:':'ws:';
-  ws=new WebSocket(`${p}//${location.host}/ws`);
-  ws.onmessage=()=>loadDevices();
-  ws.onclose=()=>setTimeout(connectWS,3000);
-  ws.onerror=()=>{};
+  // Only connect WebSocket if we're on the local hub (not VPS)
+  const isLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname.startsWith('192.168.');
+  if(!isLocal)return;
+  try{
+    const p=location.protocol==='https:'?'wss:':'ws:';
+    ws=new WebSocket(`${p}//${location.host}/ws`);
+    ws.onmessage=()=>loadDevices();
+    ws.onclose=()=>setTimeout(connectWS,5000);
+    ws.onerror=()=>{};
+  }catch{}
 }
 
 /* ═══════════════════════════════════════
