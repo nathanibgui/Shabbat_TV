@@ -1,0 +1,32 @@
+{$DOMAIN:localhost} {
+	root * /srv/www
+	file_server
+
+	# SPA fallback — serve app.html for all routes
+	try_files {path} /app.html
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy camera=(), microphone=(), geolocation=()
+	}
+
+	# Cache static assets
+	@static {
+		path *.png *.jpg *.jpeg *.gif *.svg *.ico *.woff2 *.css *.js
+	}
+	header @static Cache-Control "public, max-age=604800"
+
+	# Gzip
+	encode gzip zstd
+
+	# CORS for API proxy (if hub is connected via tunnel)
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header Access-Control-Allow-Headers "Content-Type"
+
+	# Health check
+	respond /health 200
+}

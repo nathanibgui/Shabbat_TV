@@ -1,0 +1,32 @@
+# ============================================================
+# ShabbatTV Web — VPS Deployment
+# Serves the web app (app.html) via nginx + HTTPS (Caddy)
+# ============================================================
+# Usage:
+#   docker-compose up -d          # Start
+#   docker-compose down           # Stop
+#   docker-compose logs -f        # Logs
+#   docker-compose pull && docker-compose up -d  # Update
+# ============================================================
+
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: shabbattv-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./www:/srv/www:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+
+volumes:
+  caddy-data:
+  caddy-config:
