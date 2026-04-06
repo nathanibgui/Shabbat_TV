@@ -25,67 +25,9 @@ COPY app.html /usr/share/nginx/html/app.html
 COPY manifest.json /usr/share/nginx/html/manifest.json
 COPY sw.js /usr/share/nginx/html/sw.js
 
-# Nginx config — proxy API to Python, serve static files
-RUN cat > /etc/nginx/sites-available/default << 'EOF'
-server {
-    listen 80;
-    server_name _;
-    root /usr/share/nginx/html;
-    index app.html;
-
-    # API + WebSocket → Python backend
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location /ws {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-    }
-
-    # Static files
-    location / {
-        try_files $uri $uri/ /app.html;
-    }
-
-    location /health {
-        access_log off;
-        return 200 'ok';
-    }
-}
-EOF
-
-# Supervisor config — run both nginx and python
-RUN cat > /etc/supervisor/conf.d/shabbattv.conf << 'EOF'
-[supervisord]
-nodaemon=true
-user=root
-
-[program:nginx]
-command=nginx -g "daemon off;"
-autostart=true
-autorestart=true
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-
-[program:python]
-command=python -u /app/server.py
-directory=/app
-autostart=true
-autorestart=true
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-environment=SHABBAT_DB_PATH="/app/data/shabbat.db",SHABBAT_LOG_DIR="/app/logs",SHABBAT_PORT="8080",PYTHONUNBUFFERED="1"
-EOF
+# Copy configs
+COPY deploy/nginx.conf /etc/nginx/sites-available/default
+COPY deploy/supervisord.conf /etc/supervisor/conf.d/shabbattv.conf
 
 # Environment
 ENV SHABBAT_DB_PATH=/app/data/shabbat.db
