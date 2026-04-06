@@ -19,6 +19,7 @@ import { radius, spacing } from '../../theme';
 import { press } from '../../theme/animations';
 import { fetchShabbatTimes, isShabbatNow, getCountdownToShabbat, formatTime } from '../../services/hebcal';
 import { HubAPI } from '../../services/hub-api';
+import { Image } from 'react-native';
 import {
   AnimatedCard,
   PressableScale,
@@ -29,6 +30,8 @@ import {
   SkeletonDeviceCard,
   ConfettiOverlay,
 } from '../../components';
+
+const MASCOT = require('../../../assets/mascotte_Shabbat.png');
 
 export default function HomeScreen({ navigation }: any) {
   const { t } = useTranslation();
@@ -236,7 +239,7 @@ export default function HomeScreen({ navigation }: any) {
           <AnimatedCard index={2} delay={500}>
             <PressableScale onPress={() => navigation.navigate('AddDevice')}>
               <View style={[styles.emptyCard, { backgroundColor: theme.card }]}>
-                <Text style={styles.emptyIcon}>📺</Text>
+                <Image source={MASCOT} style={styles.mascotSmall} resizeMode="contain" />
                 <Text style={[styles.emptyTitle, { color: theme.text }]}>{t('home.no_devices')}</Text>
                 <Text style={[styles.emptyDesc, { color: theme.text3 }]}>{t('home.no_devices_desc')}</Text>
                 <View style={[styles.emptyCTA, { backgroundColor: theme.accentSoft }]}>
@@ -400,7 +403,7 @@ const makeStyles = (theme: any, isDark: boolean, width: number) =>
     sectionTitle: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
     // Empty
     emptyCard: { padding: 36, borderRadius: radius.lg, alignItems: 'center', marginBottom: 14 },
-    emptyIcon: { fontSize: 44, marginBottom: 14 },
+    mascotSmall: { width: 120, height: 120, marginBottom: 14 },
     emptyTitle: { fontSize: 17, fontWeight: '700', marginBottom: 4 },
     emptyDesc: { fontSize: 13, textAlign: 'center', lineHeight: 20, marginBottom: 16 },
     emptyCTA: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12 },

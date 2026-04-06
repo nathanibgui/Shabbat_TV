@@ -7,12 +7,17 @@ import {
   TouchableOpacity,
   TextInput,
   Platform,
+  Image,
+  Alert,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useStore } from '../../hooks/useStore';
 import { radius } from '../../theme';
 import { createProfile, saveProfile } from '../../services/local-profile';
+
+const MASCOT = require('../../../assets/mascotte_Shabbat.png');
+const MASCOT_SHABBAT = require('../../../assets/Mascotte_Shabbat2.png');
 
 type Slide = 'welcome' | 'how' | 'auth' | 'gender' | 'ready';
 const SLIDES: Slide[] = ['welcome', 'how', 'auth', 'gender', 'ready'];
@@ -33,6 +38,12 @@ export default function OnboardingScreen() {
   const goNext = () => {
     if (currentSlide < SLIDES.length - 1) {
       setCurrentSlide(currentSlide + 1);
+    }
+  };
+
+  const goBack = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
     }
   };
 
@@ -96,6 +107,24 @@ export default function OnboardingScreen() {
           <View style={styles.slideContent}>
             <Text style={[styles.title, { color: theme.text }]}>{t('onboarding.auth_title')}</Text>
             <Text style={[styles.desc, { color: theme.text3, marginBottom: 28 }]}>{t('onboarding.auth_desc')}</Text>
+
+            {/* Google Sign-In button */}
+            <TouchableOpacity
+              style={styles.googleBtn}
+              onPress={() => {
+                // TODO: integrate with useGoogleAuth() when Google Client ID is set
+                Alert.alert('Google Sign-In', 'Configurez le Google Client ID pour activer la connexion Google.');
+              }}
+            >
+              <Text style={styles.googleLogo}>G</Text>
+              <Text style={styles.googleBtnText}>Continuer avec Google</Text>
+            </TouchableOpacity>
+
+            <View style={styles.separator}>
+              <View style={[styles.separatorLine, { backgroundColor: theme.border }]} />
+              <Text style={[styles.separatorText, { color: theme.text4 }]}>ou</Text>
+              <View style={[styles.separatorLine, { backgroundColor: theme.border }]} />
+            </View>
 
             <View style={styles.form}>
               <TextInput
@@ -202,21 +231,31 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        {SLIDES[currentSlide] === 'ready' ? (
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleFinish}>
-            <Text style={styles.primaryBtnText}>{t('onboarding.start')}</Text>
-          </TouchableOpacity>
-        ) : SLIDES[currentSlide] !== 'auth' && SLIDES[currentSlide] !== 'gender' ? (
-          <TouchableOpacity style={styles.primaryBtn} onPress={goNext}>
-            <Text style={styles.primaryBtnText}>{t('onboarding.continue')}</Text>
-          </TouchableOpacity>
-        ) : null}
+        <View style={styles.navRow}>
+          {currentSlide > 0 ? (
+            <TouchableOpacity style={[styles.navBtn, { backgroundColor: theme.card }]} onPress={goBack}>
+              <Text style={[styles.navBtnText, { color: theme.text }]}>Retour</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.navBtn} />
+          )}
 
-        {SLIDES[currentSlide] === 'auth' && (
-          <TouchableOpacity style={styles.skipBtn} onPress={goNext}>
-            <Text style={[styles.skipBtnText, { color: theme.text3 }]}>{t('onboarding.skip')}</Text>
-          </TouchableOpacity>
-        )}
+          {SLIDES[currentSlide] === 'ready' ? (
+            <TouchableOpacity style={[styles.navBtn, styles.primaryBtn]} onPress={handleFinish}>
+              <Text style={styles.primaryBtnText}>{t('onboarding.start')}</Text>
+            </TouchableOpacity>
+          ) : SLIDES[currentSlide] === 'auth' ? (
+            <TouchableOpacity style={styles.skipBtn} onPress={goNext}>
+              <Text style={[styles.skipBtnText, { color: theme.text3 }]}>{t('onboarding.skip')}</Text>
+            </TouchableOpacity>
+          ) : SLIDES[currentSlide] !== 'gender' ? (
+            <TouchableOpacity style={[styles.navBtn, styles.primaryBtn]} onPress={goNext}>
+              <Text style={styles.primaryBtnText}>{t('onboarding.continue')}</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.navBtn} />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -232,6 +271,9 @@ const makeStyles = (theme: any) =>
     title: { fontSize: 26, fontWeight: '900', letterSpacing: -0.6, textAlign: 'center', marginBottom: 10 },
     desc: { fontSize: 15, textAlign: 'center', lineHeight: 24, maxWidth: 320 },
     bottom: { paddingHorizontal: 32, paddingBottom: 36, gap: 10 },
+    navRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+    navBtn: { flex: 1, paddingVertical: 16, borderRadius: radius.sm, alignItems: 'center' },
+    navBtnText: { fontSize: 15, fontWeight: '600' },
     dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 },
     dot: { width: 8, height: 8, borderRadius: 4 },
     dotActive: { width: 24, borderRadius: 4 },
@@ -243,6 +285,17 @@ const makeStyles = (theme: any) =>
     primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
     skipBtn: { alignItems: 'center', paddingVertical: 12 },
     skipBtnText: { fontSize: 14, fontWeight: '600' },
+    googleBtn: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+      width: '100%', paddingVertical: 15, borderRadius: radius.sm,
+      backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#e0e0e0',
+      shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
+    },
+    googleLogo: { fontSize: 20, fontWeight: '800', color: '#4285F4' },
+    googleBtnText: { fontSize: 15, fontWeight: '600', color: '#333' },
+    separator: { flexDirection: 'row', alignItems: 'center', width: '100%', marginVertical: 20, gap: 12 },
+    separatorLine: { flex: 1, height: 1 },
+    separatorText: { fontSize: 13, fontWeight: '600' },
     form: { width: '100%', gap: 12 },
     input: {
       width: '100%', paddingHorizontal: 18, paddingVertical: 14,

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { ShabbatTimes, ZmanimData, YomTovInfo } from '../services/hebcal';
 import type { HubDevice } from '../services/hub-api';
 import type { UserProfile } from '../services/local-profile';
+import { saveAppSettings } from '../services/app-storage';
 
 interface AppState {
   // Auth / Profile (local — no cloud)
@@ -12,7 +13,7 @@ interface AppState {
   updateProfile: (updates: Partial<UserProfile>) => void;
   logout: () => void;
 
-  // Onboarding
+  // Onboarding (persisted via app-storage)
   hasCompletedOnboarding: boolean;
   hasCompletedSetup: boolean;
   setOnboardingComplete: () => void;
@@ -30,7 +31,7 @@ interface AppState {
   setDevices: (devices: HubDevice[]) => void;
   updateDevice: (id: number, updates: Partial<HubDevice>) => void;
 
-  // Hub
+  // Hub (persisted via app-storage)
   hubIp: string | null;
   hubStatus: 'online' | 'offline' | 'connecting';
   setHubIp: (ip: string | null) => void;
@@ -43,6 +44,14 @@ interface AppState {
   // Theme
   colorScheme: 'light' | 'dark' | 'system';
   setColorScheme: (scheme: 'light' | 'dark' | 'system') => void;
+
+  // Restore persisted state on startup
+  restoreSettings: (settings: {
+    hasCompletedOnboarding: boolean;
+    hasCompletedSetup: boolean;
+    hubIp: string | null;
+    colorScheme: 'light' | 'dark' | 'system';
+  }) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -56,21 +65,31 @@ export const useStore = create<AppState>((set) => ({
     set((state) => ({
       profile: state.profile ? { ...state.profile, ...updates } : null,
     })),
-  logout: () =>
+  logout: () => {
+    saveAppSettings({ hasCompletedOnboarding: false, hasCompletedSetup: false, hubIp: null });
     set({
       isAuthenticated: false,
       userId: null,
       profile: null,
+      hasCompletedOnboarding: false,
+      hasCompletedSetup: false,
       devices: [],
       hubIp: null,
       hubStatus: 'offline',
-    }),
+    });
+  },
 
-  // Onboarding
+  // Onboarding — persisted
   hasCompletedOnboarding: false,
   hasCompletedSetup: false,
-  setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
-  setSetupComplete: () => set({ hasCompletedSetup: true }),
+  setOnboardingComplete: () => {
+    saveAppSettings({ hasCompletedOnboarding: true });
+    set({ hasCompletedOnboarding: true });
+  },
+  setSetupComplete: () => {
+    saveAppSettings({ hasCompletedSetup: true });
+    set({ hasCompletedSetup: true });
+  },
 
   // Shabbat
   shabbatTimes: null,
@@ -87,10 +106,13 @@ export const useStore = create<AppState>((set) => ({
       devices: state.devices.map((d) => (d.id === id ? { ...d, ...updates } : d)),
     })),
 
-  // Hub
+  // Hub — persisted
   hubIp: null,
   hubStatus: 'offline',
-  setHubIp: (ip) => set({ hubIp: ip }),
+  setHubIp: (ip) => {
+    saveAppSettings({ hubIp: ip });
+    set({ hubIp: ip });
+  },
   setHubStatus: (status) => set({ hubStatus: status }),
 
   // Holidays
@@ -99,5 +121,16 @@ export const useStore = create<AppState>((set) => ({
 
   // Theme
   colorScheme: 'system',
-  setColorScheme: (scheme) => set({ colorScheme: scheme }),
+  setColorScheme: (scheme) => {
+    saveAppSettings({ colorScheme: scheme });
+    set({ colorScheme: scheme });
+  },
+
+  // Restore
+  restoreSettings: (settings) => set({
+    hasCompletedOnboarding: settings.hasCompletedOnboarding,
+    hasCompletedSetup: settings.hasCompletedSetup,
+    hubIp: settings.hubIp,
+    colorScheme: settings.colorScheme,
+  }),
 }));
