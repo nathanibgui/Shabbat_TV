@@ -9,7 +9,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 // Google OAuth config
 // Replace with your actual Google Client ID for production
-const GOOGLE_CLIENT_ID = ''; // Set via env or config
+const GOOGLE_CLIENT_ID = '752558880706-4fh0m4j075f7qjt0d1kqca1c0njr5ndm.apps.googleusercontent.com';
 
 const discovery = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',

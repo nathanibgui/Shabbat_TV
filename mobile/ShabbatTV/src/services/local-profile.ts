@@ -18,6 +18,7 @@ export interface UserProfile {
   geonameid: number;
   timezone: string;
   language: 'fr' | 'en' | 'he';
+  streaming_apps: string[];
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
@@ -80,6 +81,7 @@ export async function createProfile(data: {
     geonameid: 2988507,
     timezone: 'Europe/Paris',
     language: 'fr',
+    streaming_apps: [],
     avatar_url: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

@@ -1,50 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  TextInput,
-  Platform,
-  Image,
-  Alert,
+  View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput,
+  Platform, Alert, ActivityIndicator, FlatList,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useStore } from '../../hooks/useStore';
 import { radius } from '../../theme';
-import { createProfile, saveProfile } from '../../services/local-profile';
+import { createProfile, saveProfile, updateProfile as updateLocalProfile } from '../../services/local-profile';
+import { searchCities, CityResult } from '../../services/hebcal';
 
-const MASCOT = require('../../../assets/mascotte_Shabbat.png');
-const MASCOT_SHABBAT = require('../../../assets/Mascotte_Shabbat2.png');
+type Slide = 'welcome' | 'how' | 'auth' | 'gender' | 'tradition' | 'city' | 'apps' | 'ready';
+const SLIDES: Slide[] = ['welcome', 'how', 'auth', 'gender', 'tradition', 'city', 'apps', 'ready'];
 
-type Slide = 'welcome' | 'how' | 'auth' | 'gender' | 'ready';
-const SLIDES: Slide[] = ['welcome', 'how', 'auth', 'gender', 'ready'];
+const STREAMING_APPS = [
+  { key: 'netflix', emoji: '🟥', name: 'Netflix' },
+  { key: 'youtube', emoji: '🔴', name: 'YouTube' },
+  { key: 'disney', emoji: '🏰', name: 'Disney+' },
+  { key: 'prime', emoji: '📦', name: 'Prime Video' },
+  { key: 'appletv', emoji: '🍎', name: 'Apple TV+' },
+  { key: 'molotov', emoji: '📡', name: 'Molotov' },
+  { key: 'mycanal', emoji: '🎬', name: 'MyCanal' },
+  { key: 'ocs', emoji: '🎞️', name: 'OCS / Max' },
+];
 
 export default function OnboardingScreen() {
-  const { width } = Dimensions.get('window');
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { setAuth, setOnboardingComplete, updateProfile, profile } = useStore();
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auth
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const goNext = () => {
-    if (currentSlide < SLIDES.length - 1) {
-      setCurrentSlide(currentSlide + 1);
-    }
-  };
+  // Gender
+  const [gender, setGender] = useState<'male' | 'female' | null>(null);
 
+  // Tradition
+  const [tradition, setTradition] = useState<'sephardi' | 'ashkenazi'>('sephardi');
+
+  // Streaming apps
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
+
+  // City
+  const [cityQuery, setCityQuery] = useState('');
+  const [cityResults, setCityResults] = useState<CityResult[]>([]);
+  const [selectedCity, setSelectedCity] = useState<CityResult | null>(null);
+  const [searchingCity, setSearchingCity] = useState(false);
+  const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  const goNext = () => {
+    if (currentSlide < SLIDES.length - 1) setCurrentSlide(currentSlide + 1);
+  };
   const goBack = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
-    }
+    if (currentSlide > 0) setCurrentSlide(currentSlide - 1);
   };
 
   const handleCreateProfile = async () => {
@@ -65,16 +78,48 @@ export default function OnboardingScreen() {
   const handleGenderSelect = async (g: 'male' | 'female') => {
     setGender(g);
     updateProfile({ gender: g });
-    // Persist gender to local storage
     if (profile) {
       await saveProfile({ ...profile, gender: g, updated_at: new Date().toISOString() });
     }
-    setTimeout(goNext, 400);
+    setTimeout(goNext, 300);
   };
 
-  const handleFinish = () => {
-    setOnboardingComplete();
+  const handleTraditionSelect = async (t: 'sephardi' | 'ashkenazi') => {
+    setTradition(t);
+    const havdalah_minutes = t === 'sephardi' ? 72 : 42;
+    updateProfile({ tradition: t, havdalah_minutes });
+    if (profile) {
+      await saveProfile({ ...profile, tradition: t, havdalah_minutes, updated_at: new Date().toISOString() });
+    }
+    setTimeout(goNext, 300);
   };
+
+  const handleCitySearch = useCallback((text: string) => {
+    setCityQuery(text);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    if (text.length < 2) { setCityResults([]); return; }
+    const timer = setTimeout(async () => {
+      setSearchingCity(true);
+      const cities = await searchCities(text);
+      setCityResults(cities);
+      setSearchingCity(false);
+    }, 300);
+    setDebounceTimer(timer);
+  }, [debounceTimer]);
+
+  const handleCitySelect = async (city: CityResult) => {
+    setSelectedCity(city);
+    setCityResults([]);
+    setCityQuery(city.name);
+    const updates = { geonameid: city.id, city_name: city.name, timezone: city.timezone };
+    updateProfile(updates);
+    if (profile) {
+      await saveProfile({ ...profile, ...updates, updated_at: new Date().toISOString() });
+    }
+    setTimeout(goNext, 300);
+  };
+
+  const handleFinish = () => setOnboardingComplete();
 
   const styles = makeStyles(theme);
 
@@ -108,13 +153,9 @@ export default function OnboardingScreen() {
             <Text style={[styles.title, { color: theme.text }]}>{t('onboarding.auth_title')}</Text>
             <Text style={[styles.desc, { color: theme.text3, marginBottom: 28 }]}>{t('onboarding.auth_desc')}</Text>
 
-            {/* Google Sign-In button */}
             <TouchableOpacity
               style={styles.googleBtn}
-              onPress={() => {
-                // TODO: integrate with useGoogleAuth() when Google Client ID is set
-                Alert.alert('Google Sign-In', 'Configurez le Google Client ID pour activer la connexion Google.');
-              }}
+              onPress={() => Alert.alert('Google Sign-In', 'Bientot disponible')}
             >
               <Text style={styles.googleLogo}>G</Text>
               <Text style={styles.googleBtnText}>Continuer avec Google</Text>
@@ -154,9 +195,9 @@ export default function OnboardingScreen() {
               />
               {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
               <TouchableOpacity
-                style={[styles.primaryBtn, { opacity: loading ? 0.5 : 1 }]}
+                style={[styles.primaryBtn, { opacity: loading || !firstName ? 0.5 : 1 }]}
                 onPress={handleCreateProfile}
-                disabled={loading}
+                disabled={loading || !firstName}
               >
                 <Text style={styles.primaryBtnText}>
                   {loading ? t('common.loading') : t('onboarding.continue')}
@@ -171,29 +212,149 @@ export default function OnboardingScreen() {
           <View style={styles.slideContent}>
             <Text style={[styles.title, { color: theme.text }]}>{t('onboarding.gender_title')}</Text>
             <Text style={[styles.desc, { color: theme.text3, marginBottom: 28 }]}>{t('onboarding.gender_desc')}</Text>
-            <View style={styles.genderGrid}>
+            <View style={styles.choiceGrid}>
               <TouchableOpacity
-                style={[
-                  styles.genderCard,
-                  { backgroundColor: theme.card, borderColor: gender === 'male' ? theme.accent : 'transparent' },
-                  gender === 'male' && { backgroundColor: theme.accentSoft },
-                ]}
+                style={[styles.choiceCard, { backgroundColor: theme.card, borderColor: gender === 'male' ? theme.accent : 'transparent' }, gender === 'male' && { backgroundColor: theme.accentSoft }]}
                 onPress={() => handleGenderSelect('male')}
               >
-                <Text style={styles.genderEmoji}>👨</Text>
-                <Text style={[styles.genderLabel, { color: theme.text }]}>{t('onboarding.male')}</Text>
+                <Text style={styles.choiceEmoji}>👨</Text>
+                <Text style={[styles.choiceLabel, { color: theme.text }]}>{t('onboarding.male')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.genderCard,
-                  { backgroundColor: theme.card, borderColor: gender === 'female' ? theme.accent : 'transparent' },
-                  gender === 'female' && { backgroundColor: theme.accentSoft },
-                ]}
+                style={[styles.choiceCard, { backgroundColor: theme.card, borderColor: gender === 'female' ? theme.accent : 'transparent' }, gender === 'female' && { backgroundColor: theme.accentSoft }]}
                 onPress={() => handleGenderSelect('female')}
               >
-                <Text style={styles.genderEmoji}>👩</Text>
-                <Text style={[styles.genderLabel, { color: theme.text }]}>{t('onboarding.female')}</Text>
+                <Text style={styles.choiceEmoji}>👩</Text>
+                <Text style={[styles.choiceLabel, { color: theme.text }]}>{t('onboarding.female')}</Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        );
+
+      case 'tradition':
+        return (
+          <View style={styles.slideContent}>
+            <Text style={[styles.title, { color: theme.text }]}>Votre tradition</Text>
+            <Text style={[styles.desc, { color: theme.text3, marginBottom: 28 }]}>
+              Cela ajuste les horaires de Havdalah selon votre communaute.
+            </Text>
+            <View style={styles.choiceGrid}>
+              <TouchableOpacity
+                style={[styles.choiceCard, { backgroundColor: theme.card, borderColor: tradition === 'sephardi' ? theme.accent : 'transparent' }, tradition === 'sephardi' && { backgroundColor: theme.accentSoft }]}
+                onPress={() => handleTraditionSelect('sephardi')}
+              >
+                <Text style={styles.choiceEmoji}>🕎</Text>
+                <Text style={[styles.choiceLabel, { color: theme.text }]}>Sefarade</Text>
+                <Text style={[styles.choiceDesc, { color: theme.text3 }]}>Rabbenou Tam (72 min)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.choiceCard, { backgroundColor: theme.card, borderColor: tradition === 'ashkenazi' ? theme.accent : 'transparent' }, tradition === 'ashkenazi' && { backgroundColor: theme.accentSoft }]}
+                onPress={() => handleTraditionSelect('ashkenazi')}
+              >
+                <Text style={styles.choiceEmoji}>✡️</Text>
+                <Text style={[styles.choiceLabel, { color: theme.text }]}>Ashkenaze</Text>
+                <Text style={[styles.choiceDesc, { color: theme.text3 }]}>Standard (42 min)</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+
+      case 'city':
+        return (
+          <View style={styles.slideContent}>
+            <Text style={[styles.title, { color: theme.text }]}>Votre ville</Text>
+            <Text style={[styles.desc, { color: theme.text3, marginBottom: 28 }]}>
+              Pour calculer les horaires de Shabbat precis de votre region.
+            </Text>
+
+            <View style={[styles.searchBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={{ fontSize: 16 }}>🔍</Text>
+              <TextInput
+                style={[styles.searchInput, { color: theme.text }]}
+                placeholder="Rechercher une ville..."
+                placeholderTextColor={theme.text4}
+                value={cityQuery}
+                onChangeText={handleCitySearch}
+                autoCorrect={false}
+              />
+              {searchingCity && <ActivityIndicator size="small" color={theme.accent} />}
+            </View>
+
+            {selectedCity && !cityResults.length && (
+              <View style={[styles.selectedCityCard, { backgroundColor: theme.successBg }]}>
+                <Text style={{ fontSize: 20 }}>📍</Text>
+                <Text style={[styles.selectedCityText, { color: theme.success }]}>
+                  {selectedCity.name}, {selectedCity.country}
+                </Text>
+              </View>
+            )}
+
+            <FlatList
+              data={cityResults}
+              keyExtractor={(item) => String(item.id)}
+              style={styles.cityList}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.cityRow, { backgroundColor: theme.card }]}
+                  onPress={() => handleCitySelect(item)}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.cityName, { color: theme.text }]}>{item.name}</Text>
+                    <Text style={[styles.cityMeta, { color: theme.text3 }]}>
+                      {[item.admin1, item.country].filter(Boolean).join(', ')}
+                    </Text>
+                  </View>
+                  <Text style={[{ color: theme.accent, fontSize: 20, fontWeight: '700' }]}>›</Text>
+                </TouchableOpacity>
+              )}
+            />
+
+            {!selectedCity && !cityResults.length && cityQuery.length < 2 && (
+              <View style={styles.cityHint}>
+                <Text style={[styles.cityHintText, { color: theme.text4 }]}>
+                  Paris est selectionne par defaut
+                </Text>
+              </View>
+            )}
+          </View>
+        );
+
+      case 'apps':
+        return (
+          <View style={styles.slideContent}>
+            <Text style={[styles.title, { color: theme.text }]}>Vos applications</Text>
+            <Text style={[styles.desc, { color: theme.text3, marginBottom: 24 }]}>
+              Quelles apps de streaming utilisez-vous ? On adaptera l'automatisation.
+            </Text>
+            <View style={styles.appsGrid}>
+              {STREAMING_APPS.map((app) => {
+                const selected = selectedApps.includes(app.key);
+                return (
+                  <TouchableOpacity
+                    key={app.key}
+                    style={[
+                      styles.appChip,
+                      {
+                        backgroundColor: selected ? theme.accent : theme.card,
+                        borderColor: selected ? theme.accent : theme.border,
+                      },
+                    ]}
+                    onPress={() => {
+                      setSelectedApps((prev) =>
+                        prev.includes(app.key) ? prev.filter((a) => a !== app.key) : [...prev, app.key]
+                      );
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.appChipEmoji}>{app.emoji}</Text>
+                    <Text style={[styles.appChipText, { color: selected ? '#fff' : theme.text }]}>
+                      {app.name}
+                    </Text>
+                    {selected && <Text style={styles.appChipCheck}>✓</Text>}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         );
@@ -210,6 +371,16 @@ export default function OnboardingScreen() {
         );
     }
   };
+
+  const handleAppsNext = async () => {
+    updateProfile({ streaming_apps: selectedApps });
+    if (profile) {
+      await saveProfile({ ...profile, streaming_apps: selectedApps, updated_at: new Date().toISOString() });
+    }
+    goNext();
+  };
+
+  const showMainButton = !['auth', 'gender', 'tradition', 'city', 'apps'].includes(SLIDES[currentSlide]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -231,31 +402,31 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        <View style={styles.navRow}>
-          {currentSlide > 0 ? (
-            <TouchableOpacity style={[styles.navBtn, { backgroundColor: theme.card }]} onPress={goBack}>
-              <Text style={[styles.navBtnText, { color: theme.text }]}>Retour</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.navBtn} />
-          )}
+        {currentSlide > 0 && (
+          <TouchableOpacity style={styles.backBtn} onPress={goBack}>
+            <Text style={[styles.backBtnText, { color: theme.text3 }]}>← Retour</Text>
+          </TouchableOpacity>
+        )}
 
-          {SLIDES[currentSlide] === 'ready' ? (
-            <TouchableOpacity style={[styles.navBtn, styles.primaryBtn]} onPress={handleFinish}>
-              <Text style={styles.primaryBtnText}>{t('onboarding.start')}</Text>
-            </TouchableOpacity>
-          ) : SLIDES[currentSlide] === 'auth' ? (
-            <TouchableOpacity style={styles.skipBtn} onPress={goNext}>
-              <Text style={[styles.skipBtnText, { color: theme.text3 }]}>{t('onboarding.skip')}</Text>
-            </TouchableOpacity>
-          ) : SLIDES[currentSlide] !== 'gender' ? (
-            <TouchableOpacity style={[styles.navBtn, styles.primaryBtn]} onPress={goNext}>
-              <Text style={styles.primaryBtnText}>{t('onboarding.continue')}</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.navBtn} />
-          )}
-        </View>
+        {SLIDES[currentSlide] === 'ready' ? (
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleFinish}>
+            <Text style={styles.primaryBtnText}>{t('onboarding.start')}</Text>
+          </TouchableOpacity>
+        ) : SLIDES[currentSlide] === 'city' ? (
+          <TouchableOpacity style={styles.primaryBtn} onPress={goNext}>
+            <Text style={styles.primaryBtnText}>{selectedCity ? 'Continuer' : 'Garder Paris'}</Text>
+          </TouchableOpacity>
+        ) : SLIDES[currentSlide] === 'apps' ? (
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleAppsNext}>
+            <Text style={styles.primaryBtnText}>
+              {selectedApps.length > 0 ? `Continuer (${selectedApps.length})` : 'Passer'}
+            </Text>
+          </TouchableOpacity>
+        ) : showMainButton ? (
+          <TouchableOpacity style={styles.primaryBtn} onPress={goNext}>
+            <Text style={styles.primaryBtnText}>{t('onboarding.continue')}</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </View>
   );
@@ -271,9 +442,8 @@ const makeStyles = (theme: any) =>
     title: { fontSize: 26, fontWeight: '900', letterSpacing: -0.6, textAlign: 'center', marginBottom: 10 },
     desc: { fontSize: 15, textAlign: 'center', lineHeight: 24, maxWidth: 320 },
     bottom: { paddingHorizontal: 32, paddingBottom: 36, gap: 10 },
-    navRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
-    navBtn: { flex: 1, paddingVertical: 16, borderRadius: radius.sm, alignItems: 'center' },
-    navBtnText: { fontSize: 15, fontWeight: '600' },
+    backBtn: { alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 4 },
+    backBtnText: { fontSize: 13, fontWeight: '600' },
     dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 },
     dot: { width: 8, height: 8, borderRadius: 4 },
     dotActive: { width: 24, borderRadius: 4 },
@@ -283,8 +453,7 @@ const makeStyles = (theme: any) =>
       shadowColor: '#7c3aed', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 24, elevation: 8,
     },
     primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-    skipBtn: { alignItems: 'center', paddingVertical: 12 },
-    skipBtnText: { fontSize: 14, fontWeight: '600' },
+    // Google Auth
     googleBtn: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
       width: '100%', paddingVertical: 15, borderRadius: radius.sm,
@@ -296,18 +465,52 @@ const makeStyles = (theme: any) =>
     separator: { flexDirection: 'row', alignItems: 'center', width: '100%', marginVertical: 20, gap: 12 },
     separatorLine: { flex: 1, height: 1 },
     separatorText: { fontSize: 13, fontWeight: '600' },
+    // Form
     form: { width: '100%', gap: 12 },
     input: {
       width: '100%', paddingHorizontal: 18, paddingVertical: 14,
       borderRadius: radius.sm, borderWidth: 1.5, fontSize: 15,
     },
     errorText: { fontSize: 13, textAlign: 'center' },
-    genderGrid: { flexDirection: 'row', gap: 14, width: '100%' },
-    genderCard: {
+    // Choice cards (gender, tradition)
+    choiceGrid: { flexDirection: 'row', gap: 14, width: '100%' },
+    choiceCard: {
       flex: 1, paddingVertical: 24, borderRadius: radius.md,
       alignItems: 'center', borderWidth: 2,
       shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 20, elevation: 4,
     },
-    genderEmoji: { fontSize: 48, marginBottom: 10 },
-    genderLabel: { fontSize: 14, fontWeight: '700' },
+    choiceEmoji: { fontSize: 48, marginBottom: 10 },
+    choiceLabel: { fontSize: 14, fontWeight: '700' },
+    choiceDesc: { fontSize: 11, marginTop: 4 },
+    // City search
+    searchBox: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%',
+      paddingHorizontal: 16, paddingVertical: 14,
+      borderRadius: radius.sm, borderWidth: 1, marginBottom: 12,
+    },
+    searchInput: { flex: 1, fontSize: 15 },
+    cityList: { width: '100%', maxHeight: 200 },
+    cityRow: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      padding: 14, borderRadius: radius.xs, marginBottom: 6,
+    },
+    cityName: { fontSize: 14, fontWeight: '600' },
+    cityMeta: { fontSize: 11, marginTop: 2 },
+    selectedCityCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%',
+      padding: 14, borderRadius: radius.sm, marginBottom: 8,
+    },
+    selectedCityText: { fontSize: 14, fontWeight: '700' },
+    cityHint: { marginTop: 12 },
+    cityHintText: { fontSize: 13, fontWeight: '500' },
+    // Streaming apps
+    appsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, width: '100%', justifyContent: 'center' },
+    appChip: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      paddingVertical: 12, paddingHorizontal: 16,
+      borderRadius: 14, borderWidth: 1.5,
+    },
+    appChipEmoji: { fontSize: 18 },
+    appChipText: { fontSize: 14, fontWeight: '600' },
+    appChipCheck: { fontSize: 14, color: '#fff', fontWeight: '800' },
   });
