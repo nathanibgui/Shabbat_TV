@@ -3555,9 +3555,6 @@ function closeSheet(){
 
 /* ── WebSocket ── */
 function connectWS(){
-  // Only connect WebSocket if we're on the local hub (not VPS)
-  const isLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname.startsWith('192.168.');
-  if(!isLocal)return;
   try{
     const p=location.protocol==='https:'?'wss:':'ws:';
     ws=new WebSocket(`${p}//${location.host}/ws`);

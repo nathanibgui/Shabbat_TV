@@ -52,6 +52,9 @@ jobs:
                 image: ghcr.io/nathanibgui/shabbattv:latest
                 container_name: shabbattv-web
                 restart: unless-stopped
+                volumes:
+                  - shabbattv-data:/app/data
+                  - shabbattv-logs:/app/logs
                 labels:
                   - traefik.enable=true
                   - "traefik.http.routers.shabbattv.rule=Host(`shabbat.nathanibgui.com`)"
@@ -61,6 +64,9 @@ jobs:
                   - traefik.http.services.shabbattv.loadbalancer.server.port=80
                 networks:
                   - n8n_default
+            volumes:
+              shabbattv-data:
+              shabbattv-logs:
             networks:
               n8n_default:
                 external: true
