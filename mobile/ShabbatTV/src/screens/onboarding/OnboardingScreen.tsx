@@ -9,6 +9,8 @@ import { useStore } from '../../hooks/useStore';
 import { radius } from '../../theme';
 import { createProfile, saveProfile, updateProfile as updateLocalProfile } from '../../services/local-profile';
 import { searchCities, CityResult } from '../../services/hebcal';
+import { useGoogleAuth, fetchGoogleUser, exchangeCodeForToken } from '../../services/google-auth';
+import GoogleLogo from '../../components/GoogleLogo';
 
 type Slide = 'welcome' | 'how' | 'auth' | 'gender' | 'tradition' | 'city' | 'apps' | 'ready';
 const SLIDES: Slide[] = ['welcome', 'how', 'auth', 'gender', 'tradition', 'city', 'apps', 'ready'];
@@ -36,6 +38,10 @@ export default function OnboardingScreen() {
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const googleAuth = useGoogleAuth();
+  const googleRequest = googleAuth.request;
+  const googleResponse = googleAuth.response;
+  const googlePromptAsync = googleAuth.promptAsync;
 
   // Gender
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
@@ -52,6 +58,48 @@ export default function OnboardingScreen() {
   const [selectedCity, setSelectedCity] = useState<CityResult | null>(null);
   const [searchingCity, setSearchingCity] = useState(false);
   const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  // Handle Google OAuth response (authorization code flow)
+  React.useEffect(() => {
+    if (googleResponse?.type === 'success') {
+      const code = googleResponse.params?.code;
+      const codeVerifier = googleRequest?.codeVerifier;
+      if (code && codeVerifier) {
+        // Exchange code for access token
+        const redirectUri = googleRequest?.redirectUri || '';
+        exchangeCodeForToken(code, codeVerifier, redirectUri)
+          .then((accessToken) => handleGoogleSignIn(accessToken))
+          .catch((err) => setError('Erreur Google: ' + err.message));
+      }
+    }
+  }, [googleResponse]);
+
+  const handleGoogleSignIn = async (accessToken: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      const googleUser = await fetchGoogleUser(accessToken);
+      const newProfile = await createProfile({
+        email: googleUser.email,
+        first_name: googleUser.given_name || googleUser.name,
+        last_name: googleUser.family_name || '',
+      });
+      // Save avatar from Google
+      if (googleUser.picture) {
+        await saveProfile({ ...newProfile, avatar_url: googleUser.picture, updated_at: new Date().toISOString() });
+        updateProfile({ avatar_url: googleUser.picture });
+      }
+      setAuth(newProfile.id, { ...newProfile, avatar_url: googleUser.picture || null });
+      setFirstName(googleUser.given_name || '');
+      setLastName(googleUser.family_name || '');
+      setEmail(googleUser.email);
+      goNext();
+    } catch (err: any) {
+      setError('Erreur Google Sign-In');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const goNext = () => {
     if (currentSlide < SLIDES.length - 1) setCurrentSlide(currentSlide + 1);
@@ -155,10 +203,11 @@ export default function OnboardingScreen() {
 
             <TouchableOpacity
               style={styles.googleBtn}
-              onPress={() => Alert.alert('Google Sign-In', 'Bientot disponible')}
+              onPress={() => googlePromptAsync()}
+              activeOpacity={0.8}
             >
-              <Text style={styles.googleLogo}>G</Text>
-              <Text style={styles.googleBtnText}>Continuer avec Google</Text>
+              <GoogleLogo size={20} />
+              <Text style={styles.googleBtnText}>Se connecter avec Google</Text>
             </TouchableOpacity>
 
             <View style={styles.separator}>
@@ -442,8 +491,8 @@ const makeStyles = (theme: any) =>
     title: { fontSize: 26, fontWeight: '900', letterSpacing: -0.6, textAlign: 'center', marginBottom: 10 },
     desc: { fontSize: 15, textAlign: 'center', lineHeight: 24, maxWidth: 320 },
     bottom: { paddingHorizontal: 32, paddingBottom: 36, gap: 10 },
-    backBtn: { alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 4 },
-    backBtnText: { fontSize: 13, fontWeight: '600' },
+    backBtn: { alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 2, marginBottom: 4 },
+    backBtnText: { fontSize: 14, fontWeight: '600' },
     dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 12 },
     dot: { width: 8, height: 8, borderRadius: 4 },
     dotActive: { width: 24, borderRadius: 4 },
@@ -455,13 +504,12 @@ const makeStyles = (theme: any) =>
     primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
     // Google Auth
     googleBtn: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-      width: '100%', paddingVertical: 15, borderRadius: radius.sm,
-      backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#e0e0e0',
-      shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
+      width: '100%', paddingVertical: 14, borderRadius: 12,
+      backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#dadce0',
+      shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2,
     },
-    googleLogo: { fontSize: 20, fontWeight: '800', color: '#4285F4' },
-    googleBtnText: { fontSize: 15, fontWeight: '600', color: '#333' },
+    googleBtnText: { fontSize: 15, fontWeight: '500', color: '#1f1f1f' },
     separator: { flexDirection: 'row', alignItems: 'center', width: '100%', marginVertical: 20, gap: 12 },
     separatorLine: { flex: 1, height: 1 },
     separatorText: { fontSize: 13, fontWeight: '600' },
