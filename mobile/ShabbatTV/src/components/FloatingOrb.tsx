@@ -1,27 +1,15 @@
 /**
- * FloatingOrb — Background animated orb matching web hero-orb keyframe
- * Floats continuously with translate animation (15-18s cycle)
+ * FloatingOrb — Background animated orb with continuous float
  */
-import React, { useEffect } from 'react';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withSequence,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated } from 'react-native';
 
 interface Props {
   size: number;
   color: string;
-  /** Horizontal offset range */
   dx?: number;
-  /** Vertical offset range */
   dy?: number;
-  /** Animation cycle duration in ms */
   duration?: number;
-  /** Starting position */
   top?: number;
   left?: number;
   right?: number;
@@ -37,53 +25,40 @@ export default function FloatingOrb({
   left,
   right,
 }: Props) {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
+  const translateX = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const ease = Easing.inOut(Easing.ease);
-    const halfDur = duration / 2;
-
-    translateX.value = withRepeat(
-      withSequence(
-        withTiming(dx, { duration: halfDur, easing: ease }),
-        withTiming(-dx * 0.7, { duration: halfDur, easing: ease }),
-      ),
-      -1,
-      true
+    const loopX = Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateX, { toValue: dx, duration: duration / 2, useNativeDriver: true }),
+        Animated.timing(translateX, { toValue: -dx * 0.7, duration: duration / 2, useNativeDriver: true }),
+      ])
     );
-    translateY.value = withRepeat(
-      withSequence(
-        withTiming(-dy, { duration: halfDur * 0.8, easing: ease }),
-        withTiming(dy, { duration: halfDur * 1.2, easing: ease }),
-      ),
-      -1,
-      true
+    const loopY = Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateY, { toValue: -dy, duration: duration * 0.4, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: dy, duration: duration * 0.6, useNativeDriver: true }),
+      ])
     );
+    loopX.start();
+    loopY.start();
+    return () => { loopX.stop(); loopY.stop(); };
   }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-    ],
-  }));
 
   return (
     <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: color,
-          top,
-          left,
-          right,
-        },
-        animatedStyle,
-      ]}
+      style={{
+        position: 'absolute',
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        top,
+        left,
+        right,
+        transform: [{ translateX }, { translateY }],
+      }}
     />
   );
 }

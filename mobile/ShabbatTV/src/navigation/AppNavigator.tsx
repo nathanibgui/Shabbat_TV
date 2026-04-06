@@ -18,6 +18,7 @@ import StatsScreen from '../screens/home/StatsScreen';
 import NotificationsScreen from '../screens/settings/NotificationsScreen';
 import SetupWizardScreen from '../screens/setup/SetupWizardScreen';
 import DeviceSettingsScreen from '../screens/home/DeviceSettingsScreen';
+import RemoteControlScreen from '../screens/home/RemoteControlScreen';
 import CityScreen from '../screens/settings/CityScreen';
 import HelpScreen from '../screens/settings/HelpScreen';
 
@@ -199,6 +200,17 @@ export default function AppNavigator() {
               options={{
                 headerShown: true,
                 title: 'Appareil',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="RemoteControl"
+              component={RemoteControlScreen}
+              options={{
+                headerShown: true,
+                title: 'Telecommande',
                 headerBackTitle: 'Retour',
                 headerStyle: { backgroundColor: theme.bg },
                 headerTintColor: theme.accent,

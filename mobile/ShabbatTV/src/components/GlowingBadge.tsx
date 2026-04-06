@@ -1,18 +1,8 @@
 /**
- * GlowingBadge — Badge with pulsing glow animation
- * Matches web badge-glow keyframe (background oscillation over 2s)
+ * GlowingBadge — Badge with pulsing background glow
  */
-import React, { useEffect } from 'react';
-import { ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  Easing,
-  interpolate,
-  interpolateColor,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated, ViewStyle } from 'react-native';
 
 interface Props {
   children: React.ReactNode;
@@ -21,28 +11,26 @@ interface Props {
 }
 
 export default function GlowingBadge({ children, active = true, style }: Props) {
-  const progress = useSharedValue(0);
+  const glow = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (active) {
-      progress.value = withRepeat(
-        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true
-      );
-    }
+    if (!active) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glow, { toValue: 1, duration: 1000, useNativeDriver: false }),
+        Animated.timing(glow, { toValue: 0, duration: 1000, useNativeDriver: false }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
   }, [active]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    if (!active) return { backgroundColor: 'rgba(255,255,255,0.15)' };
-    return {
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 0.5, 1],
-        ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.28)', 'rgba(255,255,255,0.18)']
-      ),
-    };
-  });
+  const bgColor = active
+    ? glow.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.30)'],
+      })
+    : 'rgba(255,255,255,0.15)';
 
   return (
     <Animated.View
@@ -55,8 +43,8 @@ export default function GlowingBadge({ children, active = true, style }: Props) 
           alignItems: 'center',
           gap: 8,
           alignSelf: 'flex-start',
+          backgroundColor: bgColor,
         },
-        animatedStyle,
         style,
       ]}
     >

@@ -1,25 +1,13 @@
 /**
- * AnimatedCard — Entry animation wrapper matching web card-in / hero-in
+ * AnimatedCard — Entry animation wrapper using RN Animated API
  * Supports staggered entrance (delay based on index)
  */
-import React, { useEffect } from 'react';
-import { ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
-import { springs, stagger, entries } from '../theme/animations';
-
-type Preset = 'cardIn' | 'heroIn' | 'notifPop';
+import React, { useEffect, useRef } from 'react';
+import { Animated, ViewStyle } from 'react-native';
 
 interface Props {
   children: React.ReactNode;
   index?: number;
-  preset?: Preset;
   delay?: number;
   style?: ViewStyle | ViewStyle[];
 }
@@ -27,37 +15,41 @@ interface Props {
 export default function AnimatedCard({
   children,
   index = 0,
-  preset = 'cardIn',
   delay: customDelay,
   style,
 }: Props) {
-  const entry = entries[preset];
-  const fromOpacity = 'opacity' in entry.from ? (entry.from as any).opacity : 0;
-  const fromTranslateY = 'translateY' in entry.from ? (entry.from as any).translateY : 0;
-  const fromScale = 'scale' in entry.from ? (entry.from as any).scale : 1;
-  const toScale = 'scale' in entry.to ? (entry.to as any).scale : 1;
-
-  const opacity = useSharedValue(fromOpacity);
-  const translateY = useSharedValue(fromTranslateY);
-  const scale = useSharedValue(fromScale);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(24)).current;
+  const scale = useRef(new Animated.Value(0.96)).current;
 
   useEffect(() => {
-    const d = customDelay ?? stagger.delay(index);
-    opacity.value = withDelay(d, withTiming(1, { duration: entry.duration, easing: Easing.bezier(0.4, 0, 0.2, 1) }));
-    translateY.value = withDelay(d, withSpring(0, springs.default));
-    scale.value = withDelay(d, withSpring(toScale, springs.default));
+    const d = customDelay ?? index * 100;
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 500,
+        delay: d,
+        useNativeDriver: true,
+      }),
+      Animated.spring(translateY, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        delay: d,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1,
+        friction: 8,
+        tension: 40,
+        delay: d,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
-  }));
-
   return (
-    <Animated.View style={[animatedStyle, style]}>
+    <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }, style]}>
       {children}
     </Animated.View>
   );

@@ -1,17 +1,8 @@
 /**
- * SkeletonLoader — Shimmer loading placeholder matching web skel-shimmer
- * Animated gradient sweep that runs while content loads
+ * SkeletonLoader — Shimmer loading placeholder using RN Animated
  */
-import React, { useEffect } from 'react';
-import { View, ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  Easing,
-  interpolate,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { View, Animated, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../hooks/useTheme';
 
@@ -28,24 +19,20 @@ export default function SkeletonLoader({
   borderRadius = 10,
   style,
 }: Props) {
-  const { theme, isDark } = useTheme();
-  const shimmer = useSharedValue(0);
+  const { isDark } = useTheme();
+  const shimmer = useRef(new Animated.Value(-300)).current;
 
   useEffect(() => {
-    shimmer.value = withRepeat(
-      withTiming(1, { duration: 1500, easing: Easing.linear }),
-      -1,
-      false
+    const loop = Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 300,
+        duration: 1500,
+        useNativeDriver: true,
+      })
     );
+    loop.start();
+    return () => loop.stop();
   }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: interpolate(shimmer.value, [0, 1], [-300, 300]),
-      },
-    ],
-  }));
 
   const baseColor = isDark ? 'rgba(139,92,246,0.08)' : 'rgba(139,92,246,0.06)';
   const highlightColor = isDark ? 'rgba(139,92,246,0.15)' : 'rgba(124,58,237,0.1)';
@@ -63,7 +50,7 @@ export default function SkeletonLoader({
         style,
       ]}
     >
-      <Animated.View style={[{ width: 300, height: '100%' }, animatedStyle]}>
+      <Animated.View style={{ width: 300, height: '100%', transform: [{ translateX: shimmer }] }}>
         <LinearGradient
           colors={['transparent', highlightColor, 'transparent']}
           start={{ x: 0, y: 0 }}
@@ -75,7 +62,6 @@ export default function SkeletonLoader({
   );
 }
 
-/** Preset skeleton layouts */
 export function SkeletonHero() {
   return (
     <View style={{ padding: 30, gap: 12 }}>

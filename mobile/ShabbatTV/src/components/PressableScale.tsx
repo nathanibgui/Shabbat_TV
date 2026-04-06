@@ -1,16 +1,8 @@
 /**
- * PressableScale — TouchableOpacity replacement with spring-based scale animation
- * Matches web card:active { transform: scale(0.96) } with spring easing
+ * PressableScale — TouchableOpacity with scale feedback
  */
-import React from 'react';
-import { ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { springs, press } from '../theme/animations';
+import React, { useRef } from 'react';
+import { Animated, TouchableWithoutFeedback, ViewStyle } from 'react-native';
 
 interface Props {
   children: React.ReactNode;
@@ -23,35 +15,40 @@ interface Props {
 export default function PressableScale({
   children,
   onPress,
-  scale: pressScale = press.cardScale,
+  scale: pressScale = 0.96,
   style,
   disabled = false,
 }: Props) {
-  const scaleValue = useSharedValue(1);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const gesture = Gesture.Tap()
-    .enabled(!disabled)
-    .onBegin(() => {
-      scaleValue.value = withSpring(pressScale, springs.snappy);
-    })
-    .onFinalize(() => {
-      scaleValue.value = withSpring(1, springs.default);
-    })
-    .onEnd(() => {
-      if (onPress) {
-        onPress();
-      }
-    });
+  const onPressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: pressScale,
+      friction: 5,
+      tension: 300,
+      useNativeDriver: true,
+    }).start();
+  };
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scaleValue.value }],
-  }));
+  const onPressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 5,
+      tension: 200,
+      useNativeDriver: true,
+    }).start();
+  };
 
   return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View style={[animatedStyle, style]}>
+    <TouchableWithoutFeedback
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
         {children}
       </Animated.View>
-    </GestureDetector>
+    </TouchableWithoutFeedback>
   );
 }

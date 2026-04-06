@@ -1,28 +1,21 @@
 /**
- * ConfettiOverlay — 40 confetti pieces falling from top, matching web launchConfetti()
- * Triggered on Shabbat mode activation, successful pairing, etc.
+ * ConfettiOverlay — 40 confetti pieces falling from top
+ * Uses RN Animated API (no reanimated)
  */
-import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withDelay,
-  withTiming,
-  withSequence,
-  Easing,
-  runOnJS,
-} from 'react-native-reanimated';
-import { confetti as config } from '../theme/animations';
+import React, { useEffect, useState, useRef } from 'react';
+import { Animated, Dimensions, StyleSheet } from 'react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const COLORS = ['#7c3aed', '#6366f1', '#818cf8', '#f59e0b', '#ec4899', '#10b981', '#3b82f6'];
+const COUNT = 40;
 
 interface Props {
   active: boolean;
   onComplete?: () => void;
 }
 
-interface Piece {
+interface PieceData {
   id: number;
   color: string;
   left: number;
@@ -30,95 +23,81 @@ interface Piece {
   delay: number;
   duration: number;
   rotation: number;
+  isRound: boolean;
 }
 
-function ConfettiPiece({ piece }: { piece: Piece }) {
-  const translateY = useSharedValue(-50);
-  const opacity = useSharedValue(1);
-  const rotate = useSharedValue(0);
-  const scale = useSharedValue(1);
+function ConfettiPiece({ piece }: { piece: PieceData }) {
+  const translateY = useRef(new Animated.Value(-50)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    translateY.value = withDelay(
-      piece.delay,
-      withTiming(SCREEN_HEIGHT + 50, {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: SCREEN_HEIGHT + 50,
         duration: piece.duration,
-        easing: Easing.in(Easing.ease),
-      })
-    );
-    rotate.value = withDelay(
-      piece.delay,
-      withTiming(piece.rotation, {
+        delay: piece.delay,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rotate, {
+        toValue: piece.rotation,
         duration: piece.duration,
-        easing: Easing.linear,
-      })
-    );
-    opacity.value = withDelay(
-      piece.delay + piece.duration * 0.7,
-      withTiming(0, { duration: piece.duration * 0.3 })
-    );
-    scale.value = withDelay(
-      piece.delay,
-      withTiming(0.5, { duration: piece.duration, easing: Easing.in(Easing.ease) })
-    );
+        delay: piece.delay,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: piece.duration * 0.3,
+        delay: piece.delay + piece.duration * 0.7,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
-  const style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: translateY.value },
-      { rotate: `${rotate.value}deg` },
-      { scale: scale.value },
-    ],
-    opacity: opacity.value,
-  }));
-
-  const isRound = Math.random() > 0.5;
+  const spin = rotate.interpolate({
+    inputRange: [0, 360],
+    outputRange: ['0deg', '360deg'],
+  });
 
   return (
     <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          left: piece.left,
-          top: -20,
-          width: piece.size,
-          height: piece.size,
-          backgroundColor: piece.color,
-          borderRadius: isRound ? piece.size / 2 : 2,
-        },
-        style,
-      ]}
+      style={{
+        position: 'absolute',
+        left: piece.left,
+        top: -20,
+        width: piece.size,
+        height: piece.size,
+        backgroundColor: piece.color,
+        borderRadius: piece.isRound ? piece.size / 2 : 2,
+        opacity,
+        transform: [{ translateY }, { rotate: spin }],
+      }}
     />
   );
 }
 
 export default function ConfettiOverlay({ active, onComplete }: Props) {
-  const [pieces, setPieces] = useState<Piece[]>([]);
+  const [pieces, setPieces] = useState<PieceData[]>([]);
 
   useEffect(() => {
-    if (!active) {
-      setPieces([]);
-      return;
-    }
+    if (!active) { setPieces([]); return; }
 
-    const newPieces: Piece[] = Array.from({ length: config.count }, (_, i) => ({
+    const newPieces: PieceData[] = Array.from({ length: COUNT }, (_, i) => ({
       id: i,
-      color: config.colors[Math.floor(Math.random() * config.colors.length)],
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
       left: Math.random() * SCREEN_WIDTH,
-      size: config.size.min + Math.random() * (config.size.max - config.size.min),
-      delay: Math.random() * config.delay.max,
-      duration: config.duration.min + Math.random() * (config.duration.max - config.duration.min),
+      size: 6 + Math.random() * 6,
+      delay: Math.random() * 800,
+      duration: 2000 + Math.random() * 1500,
       rotation: 360 + Math.random() * 360,
+      isRound: Math.random() > 0.5,
     }));
     setPieces(newPieces);
 
-    // Auto cleanup
-    const maxDuration = config.duration.max + config.delay.max;
     const timer = setTimeout(() => {
       setPieces([]);
       onComplete?.();
-    }, maxDuration + 200);
-
+    }, 3800);
     return () => clearTimeout(timer);
   }, [active]);
 
@@ -126,9 +105,7 @@ export default function ConfettiOverlay({ active, onComplete }: Props) {
 
   return (
     <>
-      {pieces.map((piece) => (
-        <ConfettiPiece key={piece.id} piece={piece} />
-      ))}
+      {pieces.map((p) => <ConfettiPiece key={p.id} piece={p} />)}
     </>
   );
 }

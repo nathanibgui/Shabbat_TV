@@ -40,7 +40,7 @@ export default function HolidaysScreen() {
 
   const loadHolidays = async () => {
     setLoading(true);
-    const holidays = await fetchUpcomingHolidays(profile?.geonameid || 2988507);
+    const holidays = await fetchUpcomingHolidays(profile?.geonameid || 2988507, profile?.language || 'fr');
     setUpcomingHolidays(holidays);
     setLoading(false);
   };

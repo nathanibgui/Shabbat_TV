@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  FlatList, ActivityIndicator, Platform, Alert,
+  FlatList, ActivityIndicator, Platform, Alert, Animated,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
 import { useStore } from '../../hooks/useStore';
 import { searchCities, CityResult } from '../../services/hebcal';
@@ -11,7 +10,7 @@ import { updateProfile } from '../../services/local-profile';
 import { radius } from '../../theme';
 
 export default function CityScreen({ navigation }: any) {
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
   const { profile, updateProfile: updateStoreProfile } = useStore();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CityResult[]>([]);
@@ -50,18 +49,10 @@ export default function CityScreen({ navigation }: any) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
-      <Animated.Text
-        entering={FadeInDown.delay(100).duration(400)}
-        style={[styles.title, { color: theme.text }]}
-      >
-        Ma ville
-      </Animated.Text>
+      <Text style={[styles.title, { color: theme.text }]}>Ma ville</Text>
 
       {/* Current city */}
-      <Animated.View
-        entering={FadeInDown.delay(200).duration(400)}
-        style={[styles.currentCard, { backgroundColor: theme.card }]}
-      >
+      <View style={[styles.currentCard, { backgroundColor: theme.card }]}>
         <Text style={styles.currentFlag}>📍</Text>
         <View style={{ flex: 1 }}>
           <Text style={[styles.currentName, { color: theme.text }]}>{currentCity}</Text>
@@ -70,24 +61,22 @@ export default function CityScreen({ navigation }: any) {
         <View style={[styles.currentBadge, { backgroundColor: theme.successBg }]}>
           <Text style={[styles.currentBadgeText, { color: theme.success }]}>Active</Text>
         </View>
-      </Animated.View>
+      </View>
 
       {/* Search */}
-      <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-        <Text style={[styles.sectionLabel, { color: theme.text3 }]}>Changer de ville</Text>
-        <View style={[styles.searchBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="Rechercher une ville..."
-            placeholderTextColor={theme.text4}
-            value={query}
-            onChangeText={handleSearch}
-            autoCorrect={false}
-          />
-          {searching && <ActivityIndicator size="small" color={theme.accent} />}
-        </View>
-      </Animated.View>
+      <Text style={[styles.sectionLabel, { color: theme.text3 }]}>Changer de ville</Text>
+      <View style={[styles.searchBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          style={[styles.searchInput, { color: theme.text }]}
+          placeholder="Rechercher une ville..."
+          placeholderTextColor={theme.text4}
+          value={query}
+          onChangeText={handleSearch}
+          autoCorrect={false}
+        />
+        {searching && <ActivityIndicator size="small" color={theme.accent} />}
+      </View>
 
       {/* Results */}
       <FlatList
@@ -95,22 +84,20 @@ export default function CityScreen({ navigation }: any) {
         keyExtractor={(item) => String(item.id)}
         style={styles.resultsList}
         keyboardShouldPersistTaps="handled"
-        renderItem={({ item, index }) => (
-          <Animated.View entering={FadeInDown.delay(100 + index * 50).duration(300)}>
-            <TouchableOpacity
-              style={[styles.resultRow, { backgroundColor: theme.card }]}
-              onPress={() => handleSelect(item)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.resultInfo}>
-                <Text style={[styles.resultName, { color: theme.text }]}>{item.name}</Text>
-                <Text style={[styles.resultMeta, { color: theme.text3 }]}>
-                  {[item.admin1, item.country].filter(Boolean).join(', ')}
-                </Text>
-              </View>
-              <Text style={[styles.resultArrow, { color: theme.accent }]}>›</Text>
-            </TouchableOpacity>
-          </Animated.View>
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[styles.resultRow, { backgroundColor: theme.card }]}
+            onPress={() => handleSelect(item)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.resultInfo}>
+              <Text style={[styles.resultName, { color: theme.text }]}>{item.name}</Text>
+              <Text style={[styles.resultMeta, { color: theme.text3 }]}>
+                {[item.admin1, item.country].filter(Boolean).join(', ')}
+              </Text>
+            </View>
+            <Text style={[styles.resultArrow, { color: theme.accent }]}>›</Text>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           query.length >= 2 && !searching ? (

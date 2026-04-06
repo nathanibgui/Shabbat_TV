@@ -30,9 +30,10 @@ export interface YomTovInfo {
   category: string;
 }
 
-export async function fetchShabbatTimes(geonameid: number = 2988507): Promise<ShabbatTimes> {
+export async function fetchShabbatTimes(geonameid: number = 2988507, lang: string = 'fr'): Promise<ShabbatTimes> {
   try {
-    const url = `https://www.hebcal.com/shabbat?cfg=json&geonameid=${geonameid}&M=on`;
+    const lgParam = lang === 'he' ? 'he' : lang === 'fr' ? 'fr' : 's';
+    const url = `https://www.hebcal.com/shabbat?cfg=json&geonameid=${geonameid}&M=on&lg=${lgParam}`;
     const response = await fetch(url);
     const data = await response.json();
 
@@ -95,10 +96,12 @@ export async function fetchZmanim(
   }
 }
 
-export async function fetchUpcomingHolidays(geonameid: number = 2988507): Promise<YomTovInfo[]> {
+export async function fetchUpcomingHolidays(geonameid: number = 2988507, lang: string = 'fr'): Promise<YomTovInfo[]> {
   try {
     const year = new Date().getFullYear();
-    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=x&geonameid=${geonameid}&maj=on&min=on&mod=on&nx=on&mf=on&ss=on`;
+    // lg=fr for French, lg=he for Hebrew, lg=s for Sephardic transliteration
+    const lgParam = lang === 'he' ? 'he' : lang === 'fr' ? 'fr' : 's';
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=x&geonameid=${geonameid}&maj=on&min=on&mod=on&nx=on&mf=on&ss=on&lg=${lgParam}`;
     const response = await fetch(url);
     const data = await response.json();
 

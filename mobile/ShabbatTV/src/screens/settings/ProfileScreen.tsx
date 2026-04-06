@@ -35,7 +35,7 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   const styles = makeStyles(theme);
-  const tradition = profile?.tradition || 'ashkenazi';
+  const tradition = profile?.tradition || 'sephardi';
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.bg }]} contentContainerStyle={styles.content}>

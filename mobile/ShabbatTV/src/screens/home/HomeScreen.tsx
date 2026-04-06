@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,27 +10,13 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withRepeat,
-  withSequence,
-  withTiming,
-  withDelay,
-  Easing,
-  interpolate,
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  Layout,
-} from 'react-native-reanimated';
+import { Animated as RNAnimated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useStore } from '../../hooks/useStore';
 import { radius, spacing } from '../../theme';
-import { springs, press } from '../../theme/animations';
+import { press } from '../../theme/animations';
 import { fetchShabbatTimes, isShabbatNow, getCountdownToShabbat, formatTime } from '../../services/hebcal';
 import { HubAPI } from '../../services/hub-api';
 import {
@@ -44,8 +30,6 @@ import {
   ConfettiOverlay,
 } from '../../components';
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
-
 export default function HomeScreen({ navigation }: any) {
   const { t } = useTranslation();
   const { theme, isDark } = useTheme();
@@ -58,35 +42,29 @@ export default function HomeScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Shimmer animation for active device cards
-  const shimmerProgress = useSharedValue(0);
-  useEffect(() => {
-    shimmerProgress.value = withRepeat(
-      withTiming(1, { duration: 3000, easing: Easing.linear }),
-      -1,
-      false
-    );
-  }, []);
-
   // Logo breathe animation
-  const logoBreathe = useSharedValue(0);
+  const logoBreathe = useRef(new RNAnimated.Value(0)).current;
   useEffect(() => {
-    logoBreathe.value = withRepeat(
-      withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true
+    const loop = RNAnimated.loop(
+      RNAnimated.sequence([
+        RNAnimated.timing(logoBreathe, { toValue: 1, duration: 2000, useNativeDriver: false }),
+        RNAnimated.timing(logoBreathe, { toValue: 0, duration: 2000, useNativeDriver: false }),
+      ])
     );
+    loop.start();
+    return () => loop.stop();
   }, []);
 
-  const logoAnimStyle = useAnimatedStyle(() => ({
-    shadowOpacity: interpolate(logoBreathe.value, [0, 0.5, 1], [0.25, 0.45, 0.25]),
-    shadowRadius: interpolate(logoBreathe.value, [0, 0.5, 1], [8, 14, 8]),
-  }));
+  const logoShadowOpacity = logoBreathe.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.25, 0.45],
+  });
 
   // Fetch Shabbat times
   const loadShabbatTimes = useCallback(async () => {
     const geonameid = profile?.geonameid || 2988507;
-    const times = await fetchShabbatTimes(geonameid);
+    const lang = profile?.language || 'fr';
+    const times = await fetchShabbatTimes(geonameid, lang);
     const active = isShabbatNow(times);
     setShabbatTimes(times, active);
   }, [profile?.geonameid]);
@@ -152,14 +130,13 @@ export default function HomeScreen({ navigation }: any) {
       <ConfettiOverlay active={showConfetti} onComplete={() => setShowConfetti(false)} />
 
       {/* Header with glass effect */}
-      <Animated.View
-        entering={FadeInDown.duration(400).delay(100)}
+      <View
         style={[styles.header, { borderBottomColor: theme.border }]}
       >
         <View style={styles.logo}>
-          <Animated.View style={[styles.logoIcon, logoAnimStyle, { shadowColor: '#7c3aed' }]}>
+          <RNAnimated.View style={[styles.logoIcon, { shadowColor: '#7c3aed', shadowOpacity: logoShadowOpacity, shadowOffset: { width: 0, height: 4 } }]}>
             <Text style={styles.logoEmoji}>✡</Text>
-          </Animated.View>
+          </RNAnimated.View>
           <Text style={[styles.logoText, { color: theme.text }]}>Shabbat TV</Text>
         </View>
         <View style={styles.headerRight}>
@@ -183,7 +160,7 @@ export default function HomeScreen({ navigation }: any) {
             </View>
           </PressableScale>
         </View>
-      </Animated.View>
+      </View>
 
       <ScrollView
         style={styles.scroll}
@@ -197,7 +174,7 @@ export default function HomeScreen({ navigation }: any) {
             <SkeletonHero />
           </View>
         ) : (
-          <AnimatedCard preset="heroIn" delay={200}>
+          <AnimatedCard delay={200}>
             <LinearGradient
               colors={['#7c3aed', '#6366f1', '#818cf8']}
               start={{ x: 0, y: 0 }}
@@ -210,23 +187,14 @@ export default function HomeScreen({ navigation }: any) {
               <FloatingOrb size={50} color="rgba(255,255,255,0.05)" top={20} right={60} duration={12000} dx={15} dy={-15} />
 
               <View style={styles.heroInner}>
-                <Animated.Text
-                  entering={FadeIn.delay(400).duration(600)}
-                  style={styles.heroEyebrow}
-                >
+                <Text style={styles.heroEyebrow}>
                   {shabbatTimes?.parasha || 'Parashat Hashavua'}
-                </Animated.Text>
-                <Animated.Text
-                  entering={FadeInDown.delay(500).duration(600).springify().damping(14)}
-                  style={styles.heroTitle}
-                >
+                </Text>
+                <Text style={styles.heroTitle}>
                   {shabbatTimes?.parasha?.replace('Parashat ', '') || 'Shabbat Shalom'}
-                </Animated.Text>
+                </Text>
 
-                <Animated.View
-                  entering={FadeInDown.delay(600).duration(500)}
-                  style={styles.heroRow}
-                >
+                <View style={styles.heroRow}>
                   <View style={styles.heroTime}>
                     <Text style={styles.heroTimeLabel}>{t('home.candle_lighting').toUpperCase()}</Text>
                     <Text style={styles.heroTimeValue}>{formatTime(shabbatTimes?.candleLighting || null)}</Text>
@@ -235,23 +203,18 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={styles.heroTimeLabel}>{t('home.havdalah').toUpperCase()}</Text>
                     <Text style={styles.heroTimeValue}>{formatTime(shabbatTimes?.havdalah || null)}</Text>
                   </View>
-                </Animated.View>
+                </View>
 
                 {isShabbat ? (
-                  <Animated.View entering={FadeInUp.delay(800).duration(500).springify()}>
-                    <GlowingBadge active style={{ marginTop: 18 }}>
-                      <PulsingDot color="#fff" size={8} />
-                      <Text style={styles.heroBadgeText}>{t('home.shabbat_active')}</Text>
-                    </GlowingBadge>
-                  </Animated.View>
+                  <GlowingBadge active style={{ marginTop: 18 }}>
+                    <PulsingDot color="#fff" size={8} />
+                    <Text style={styles.heroBadgeText}>{t('home.shabbat_active')}</Text>
+                  </GlowingBadge>
                 ) : countdown ? (
-                  <Animated.View
-                    entering={FadeInUp.delay(800).duration(500)}
-                    style={styles.heroCountdown}
-                  >
+                  <View style={styles.heroCountdown}>
                     <Text style={styles.heroCountdownLabel}>{t('home.shabbat_in')}</Text>
                     <Text style={styles.heroCountdownTimer}>{countdown}</Text>
-                  </Animated.View>
+                  </View>
                 ) : null}
               </View>
             </LinearGradient>
@@ -296,14 +259,14 @@ export default function HomeScreen({ navigation }: any) {
               >
                 {/* Shimmer overlay for active devices */}
                 {device.script_running && (
-                  <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: radius.lg, overflow: 'hidden', opacity: 0.4 }]}>
+                  <View style={[StyleSheet.absoluteFill, { borderRadius: radius.lg, overflow: 'hidden', opacity: 0.4 }]}>
                     <LinearGradient
                       colors={['transparent', 'rgba(124,58,237,0.03)', 'transparent']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={{ flex: 1 }}
                     />
-                  </Animated.View>
+                  </View>
                 )}
 
                 <View style={styles.devTop}>
@@ -311,14 +274,14 @@ export default function HomeScreen({ navigation }: any) {
                     onPress={() => navigation.navigate('DeviceSettings', { device })}
                     style={styles.devLeft}
                   >
-                    <Animated.View
+                    <View
                       style={[
                         styles.devAvatar,
                         device.script_running && styles.devAvatarActive,
                       ]}
                     >
                       <Text style={styles.devAvatarEmoji}>📺</Text>
-                    </Animated.View>
+                    </View>
                     <View>
                       <Text style={[styles.devName, { color: theme.text }]}>{device.name}</Text>
                       <Text style={[styles.devSubtitle, { color: theme.text3 }]}>Apple TV · Modifier ✏</Text>

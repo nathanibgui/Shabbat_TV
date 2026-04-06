@@ -5,11 +5,22 @@ import { useStore } from '../../hooks/useStore';
 import { HubAPI } from '../../services/hub-api';
 import { radius } from '../../theme';
 
+const APP_STRATEGIES = [
+  { key: 'generic', emoji: '📺', name: 'Generique', desc: 'Play + Select (par defaut)' },
+  { key: 'netflix', emoji: '🟥', name: 'Netflix', desc: 'Gere "Etes-vous toujours la?"' },
+  { key: 'youtube', emoji: '🔴', name: 'YouTube', desc: 'Skip pubs, video suivante' },
+  { key: 'disney', emoji: '🏰', name: 'Disney+', desc: 'Episode suivant automatique' },
+  { key: 'prime', emoji: '📦', name: 'Prime Video', desc: 'Dismiss X-Ray, episode suivant' },
+  { key: 'appletv', emoji: '🍎', name: 'Apple TV+', desc: 'Episode suivant' },
+  { key: 'molotov', emoji: '📡', name: 'Molotov / MyCanal', desc: 'Gere les pubs' },
+];
+
 export default function DeviceSettingsScreen({ route, navigation }: any) {
   const { theme } = useTheme();
   const { hubIp, setDevices } = useStore();
   const device = route.params?.device;
   const [name, setName] = useState(device?.name || '');
+  const [strategy, setStrategy] = useState(device?.strategy || 'generic');
 
   const hub = hubIp ? new HubAPI(hubIp) : null;
 
@@ -98,6 +109,43 @@ export default function DeviceSettingsScreen({ route, navigation }: any) {
         </View>
       </View>
 
+      {/* App Strategy */}
+      <Text style={[styles.sectionLabel, { color: theme.text3 }]}>Strategie par application</Text>
+      <View style={[styles.strategyList, { backgroundColor: theme.card }]}>
+        {APP_STRATEGIES.map((app, i) => (
+          <React.Fragment key={app.key}>
+            <TouchableOpacity
+              style={styles.strategyRow}
+              onPress={() => setStrategy(app.key)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.strategyEmoji}>{app.emoji}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.strategyName, { color: theme.text }]}>{app.name}</Text>
+                <Text style={[styles.strategyDesc, { color: theme.text3 }]}>{app.desc}</Text>
+              </View>
+              <View style={[styles.radio, strategy === app.key && styles.radioActive]} />
+            </TouchableOpacity>
+            {i < APP_STRATEGIES.length - 1 && (
+              <View style={[styles.infoDivider, { backgroundColor: theme.border }]} />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
+
+      {/* Remote Control */}
+      <TouchableOpacity
+        style={[styles.remoteBtn, { backgroundColor: theme.accentSoft }]}
+        onPress={() => navigation.navigate('RemoteControl', { device })}
+      >
+        <Text style={styles.remoteBtnEmoji}>🎮</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.remoteBtnTitle, { color: theme.accent }]}>Telecommande</Text>
+          <Text style={[styles.remoteBtnDesc, { color: theme.text3 }]}>Controler l'Apple TV a distance</Text>
+        </View>
+        <Text style={[styles.remoteBtnArrow, { color: theme.accent }]}>›</Text>
+      </TouchableOpacity>
+
       {/* Save */}
       <TouchableOpacity style={[styles.saveBtn, { backgroundColor: theme.accent }]} onPress={handleSave}>
         <Text style={styles.saveBtnText}>Enregistrer les modifications</Text>
@@ -127,8 +175,23 @@ const styles = StyleSheet.create({
   infoKey: { fontSize: 13, fontWeight: '500' },
   infoVal: { fontSize: 13, fontWeight: '600', maxWidth: '60%', textAlign: 'right' },
   infoDivider: { height: 1, marginHorizontal: 16 },
+  remoteBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    padding: 18, borderRadius: radius.sm, marginBottom: 16,
+  },
+  remoteBtnEmoji: { fontSize: 28 },
+  remoteBtnTitle: { fontSize: 15, fontWeight: '700' },
+  remoteBtnDesc: { fontSize: 12, marginTop: 2 },
+  remoteBtnArrow: { fontSize: 24, fontWeight: '700' },
   saveBtn: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  strategyList: { borderRadius: radius.sm, overflow: 'hidden', marginBottom: 24 },
+  strategyRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  strategyEmoji: { fontSize: 22 },
+  strategyName: { fontSize: 14, fontWeight: '600' },
+  strategyDesc: { fontSize: 11, marginTop: 1 },
+  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#c4c1e0' },
+  radioActive: { borderColor: '#7c3aed', backgroundColor: '#7c3aed' },
   deleteBtn: { paddingVertical: 14, borderRadius: radius.md, borderWidth: 1.5, alignItems: 'center' },
   deleteBtnText: { fontSize: 14, fontWeight: '600' },
 });
