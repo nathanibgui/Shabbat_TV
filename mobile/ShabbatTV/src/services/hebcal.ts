@@ -151,6 +151,41 @@ export function getCountdownToShabbat(times: ShabbatTimes): string | null {
   return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
 }
 
+// City search via Hebcal autocomplete
+export interface CityResult {
+  id: number; // geonameid
+  name: string;
+  country: string;
+  admin1?: string; // state/region
+  latitude: number;
+  longitude: number;
+  timezone: string;
+}
+
+export async function searchCities(query: string): Promise<CityResult[]> {
+  if (!query || query.length < 2) return [];
+  try {
+    const url = `https://www.hebcal.com/complete?q=${encodeURIComponent(query)}&limit=8`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    return (data || [])
+      .filter((item: any) => item.id && item.geo === 'geoname')
+      .map((item: any) => ({
+        id: parseInt(item.id, 10),
+        name: item.value || item.asciiname || '',
+        country: item.country || '',
+        admin1: item.admin1 || '',
+        latitude: parseFloat(item.latitude) || 0,
+        longitude: parseFloat(item.longitude) || 0,
+        timezone: item.timezone || 'UTC',
+      }));
+  } catch (error) {
+    console.error('Failed to search cities:', error);
+    return [];
+  }
+}
+
 export function formatTime(isoDate: string | null): string {
   if (!isoDate) return '--:--';
   try {

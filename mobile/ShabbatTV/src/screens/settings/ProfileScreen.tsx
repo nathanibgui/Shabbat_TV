@@ -92,25 +92,6 @@ export default function ProfileScreen({ navigation }: any) {
         ))}
       </View>
 
-      {/* Dark mode */}
-      <Text style={[styles.sectionLabel, { color: theme.text3 }]}>{t('profile.dark_mode')}</Text>
-      <View style={styles.darkModeRow}>
-        {(['system', 'light', 'dark'] as const).map((scheme) => (
-          <TouchableOpacity
-            key={scheme}
-            style={[
-              styles.langBtn,
-              { backgroundColor: colorScheme === scheme ? theme.accent : theme.card },
-            ]}
-            onPress={() => setColorScheme(scheme)}
-          >
-            <Text style={[styles.langText, { color: colorScheme === scheme ? '#fff' : theme.text }]}>
-              {scheme === 'system' ? '⚙️ Auto' : scheme === 'light' ? '☀️ Light' : '🌙 Dark'}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
       {/* Hub IP Configuration */}
       <Text style={[styles.sectionLabel, { color: theme.text3 }]}>Hub (Raspberry Pi)</Text>
       <View style={[styles.hubRow, { backgroundColor: theme.card }]}>

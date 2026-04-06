@@ -53,5 +53,18 @@ export const colors = {
   },
 } as const;
 
-export type ThemeColors = typeof colors.light;
+export type ThemeColors = {
+  bg: string; bg2: string; card: string; cardHover: string;
+  text: string; text2: string; text3: string; text4: string;
+  accent: string; accent2: string; accent3: string;
+  accentSoft: string; accentMedium: string;
+  success: string; successBg: string;
+  danger: string; dangerBg: string;
+  warning: string; border: string;
+  gradient: readonly string[];
+  gradientWarm: readonly string[];
+  gradientCool: readonly string[];
+  gradientRose: readonly string[];
+  gradientGreen: readonly string[];
+};
 export type ColorScheme = 'light' | 'dark';
