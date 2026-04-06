@@ -25,9 +25,10 @@ from aiohttp import web
 try:
     import pyatv
     from pyatv.const import DeviceState, Protocol
+    PYATV_AVAILABLE = True
 except ImportError:
-    print("Erreur: pyatv n'est pas installe.")
-    sys.exit(1)
+    PYATV_AVAILABLE = False
+    print("Warning: pyatv non installe — mode API uniquement (pas de controle TV)")
 
 SCRIPT_DIR = Path(__file__).parent
 PYTHON_EXE = sys.executable
