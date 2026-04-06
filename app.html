@@ -2384,17 +2384,30 @@ body{
 <div class="sheet" id="sheet-city">
   <div class="sheet-bar"></div>
   <div class="sheet-title">Ma ville</div>
-  <div class="city-current">
-    <div class="city-icon">&#x1F1EB;&#x1F1F7;</div>
-    <div>
-      <div class="city-name">Paris</div>
-      <div class="city-sub">Horaires Ile-de-France</div>
+
+  <!-- Ville actuelle -->
+  <div id="cityCurrentCard" style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);border-radius:var(--radius-xs);margin-bottom:20px">
+    <span style="font-size:28px">📍</span>
+    <div style="flex:1">
+      <div style="font-size:17px;font-weight:700" id="cityCurrent">Paris</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">Ville actuelle</div>
+    </div>
+    <div style="padding:4px 10px;border-radius:8px;background:var(--success-bg)">
+      <span style="font-size:11px;font-weight:700;color:var(--success)">Active</span>
     </div>
   </div>
-  <p style="font-size:13px;color:var(--text3);line-height:1.6">
-    Les horaires de Shabbat sont automatiquement calcules pour votre ville.
-    Le changement de ville sera disponible dans une prochaine version.
-  </p>
+
+  <!-- Recherche -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:10px">Changer de ville</div>
+  <div style="position:relative;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--accent-soft)">
+      <span style="font-size:16px">🔍</span>
+      <input type="text" id="sheetCitySearch" placeholder="Rechercher une ville..." oninput="sheetSearchCity(this.value)" autocomplete="off"
+        style="flex:1;border:none;background:none;font-size:15px;font-family:inherit;color:var(--text);outline:none">
+      <span id="sheetCitySpinner" style="display:none;font-size:14px">⏳</span>
+    </div>
+    <div id="sheetCityResults" style="position:absolute;top:100%;left:0;right:0;max-height:250px;overflow-y:auto;background:var(--card);border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow-lg);z-index:10;display:none"></div>
+  </div>
 </div>
 
 <!-- Sheet: Profile -->
@@ -2791,6 +2804,51 @@ function setProfileTradition(val){
   });
   toast('Tradition mise a jour');
   loadShabbat();
+}
+
+/* ── Sheet city search ── */
+let sheetCityTimer=null;
+function sheetSearchCity(q){
+  clearTimeout(sheetCityTimer);
+  const res=document.getElementById('sheetCityResults');
+  const spinner=document.getElementById('sheetCitySpinner');
+  if(q.length<2){res.style.display='none';return;}
+  spinner.style.display='inline';
+  sheetCityTimer=setTimeout(async()=>{
+    try{
+      const r=await fetch(`https://www.hebcal.com/complete?q=${encodeURIComponent(q)}&limit=8`);
+      const data=await r.json();
+      const cities=(data||[]).filter(i=>i.id&&i.geo==='geoname');
+      spinner.style.display='none';
+      if(cities.length===0){res.style.display='none';return;}
+      res.innerHTML=cities.map(c=>`
+        <div onclick="sheetPickCity(${c.id},'${esc(c.value||c.asciiname)}','${esc(c.country||'')}')"
+          style="padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--accent-soft);transition:background 0.15s"
+          onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background='transparent'">
+          <div style="font-weight:600;font-size:14px">${esc(c.value||c.asciiname)}</div>
+          <div style="font-size:12px;color:var(--text3)">${esc(c.admin1||'')}${c.admin1&&c.country?', ':''}${esc(c.country||'')}</div>
+        </div>`).join('');
+      res.style.display='block';
+    }catch{spinner.style.display='none';res.style.display='none';}
+  },300);
+}
+
+function sheetPickCity(geonameid,name,country){
+  document.getElementById('sheetCityResults').style.display='none';
+  document.getElementById('sheetCitySearch').value='';
+  document.getElementById('cityCurrent').textContent=name;
+  if(currentUser){
+    currentUser.geonameid=geonameid;
+    currentUser.city_name=name;
+    saveUser(currentUser);
+  }
+  // Update profile page city
+  const el=document.getElementById('profilePageCityName');
+  if(el)el.textContent=name;
+  toast('Ville changee : '+name+', '+country);
+  // Reload shabbat times with new city
+  loadShabbat();
+  closeSheet();
 }
 
 function saveHubIp(){
@@ -3427,6 +3485,10 @@ function openSheet(name){
   if(name==='holidays')loadHolidays();
   if(name==='remote')openRemote();
   if(name==='playlist')playlistRender();
+  if(name==='city'){
+    const user=getUser();
+    document.getElementById('cityCurrent').textContent=user?.city_name||'Paris';
+  }
 }
 
 function closeSheet(){
