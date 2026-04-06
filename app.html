@@ -2262,10 +2262,34 @@ body{
     <div class="profile-email" id="profileEmail">--</div>
   </div>
 
+  <!-- Tradition -->
+  <div style="margin:20px 0 8px 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Tradition</div>
+  <div style="display:flex;gap:10px" id="profileTradition">
+    <button class="profile-choice-btn" data-val="sephardi" onclick="setProfileTradition('sephardi')">🕎 Sefarade</button>
+    <button class="profile-choice-btn" data-val="ashkenazi" onclick="setProfileTradition('ashkenazi')">✡️ Ashkenaze</button>
+  </div>
+
+  <!-- Langue -->
+  <div style="margin:20px 0 8px 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Langue</div>
+  <div style="display:flex;gap:10px" id="profileLang">
+    <button class="profile-choice-btn" data-val="fr" onclick="setProfileLang('fr')">🇫🇷 FR</button>
+    <button class="profile-choice-btn" data-val="en" onclick="setProfileLang('en')">🇬🇧 EN</button>
+    <button class="profile-choice-btn" data-val="he" onclick="setProfileLang('he')">🇮🇱 HE</button>
+  </div>
+
+  <!-- Ville -->
+  <div style="margin:20px 0 8px 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Ville</div>
+  <div id="profileCity" style="padding:14px 16px;background:var(--card);border-radius:var(--radius-xs);display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="font-size:20px">📍</span>
+    <span style="font-weight:600;font-size:14px" id="profileCityName">Paris</span>
+  </div>
+
+  <div style="height:20px"></div>
+
   <div class="profile-menu-item" onclick="openSheet('city')">
     <div class="profile-menu-left">
       <div class="profile-menu-icon" style="background:rgba(251,191,36,0.1)">&#x1F30D;</div>
-      <div><h4>Ma ville</h4><p>Horaires Shabbat locaux</p></div>
+      <div><h4>Changer de ville</h4><p>Horaires Shabbat locaux</p></div>
     </div>
     <span class="profile-menu-arrow">&#x203A;</span>
   </div>
@@ -2286,7 +2310,23 @@ body{
     <span class="profile-menu-arrow">&#x203A;</span>
   </div>
 
-  <div class="profile-menu-item">
+  <div class="profile-menu-item" onclick="openSheet('zmanim')">
+    <div class="profile-menu-left">
+      <div class="profile-menu-icon" style="background:rgba(245,158,11,0.1)">&#x1F570;</div>
+      <div><h4>Zmanim</h4><p>Horaires de priere</p></div>
+    </div>
+    <span class="profile-menu-arrow">&#x203A;</span>
+  </div>
+
+  <div class="profile-menu-item" onclick="openSheet('holidays')">
+    <div class="profile-menu-left">
+      <div class="profile-menu-icon" style="background:rgba(236,72,153,0.08)">&#x1F4C5;</div>
+      <div><h4>Fetes</h4><p>Calendrier juif</p></div>
+    </div>
+    <span class="profile-menu-arrow">&#x203A;</span>
+  </div>
+
+  <div class="profile-menu-item" onclick="openSheet('help')">
     <div class="profile-menu-left">
       <div class="profile-menu-icon" style="background:rgba(96,165,250,0.1)">&#x2753;</div>
       <div><h4>Aide</h4><p>Comment ca marche</p></div>
@@ -2294,31 +2334,51 @@ body{
     <span class="profile-menu-arrow">&#x203A;</span>
   </div>
 
+  <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--text4);font-weight:600">Version 1.0.0</div>
+
   <button class="logout-btn" onclick="doLogout()">Se deconnecter</button>
 </div>
 
-<!-- Sheet: Device settings -->
+<!-- Sheet: Device settings (page dediee) -->
 <div class="sheet" id="sheet-device">
   <div class="sheet-bar"></div>
 
   <div class="dev-edit-header">
-    <div class="dev-edit-avatar" id="deviceSettingsAvatar">&#x1F4FA;</div>
+    <div class="dev-edit-avatar" id="deviceSettingsAvatar">📺</div>
     <div class="dev-edit-name-wrap">
       <input class="dev-edit-name-input" id="deviceEditName" placeholder="Nom de l'appareil" spellcheck="false">
       <div class="dev-edit-name-hint">Appuyez pour modifier le nom</div>
     </div>
   </div>
 
+  <!-- Status connexion -->
+  <div id="deviceConnStatus" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--radius-xs);margin-bottom:16px"></div>
+
+  <!-- Informations -->
   <div class="dev-edit-section-label">Informations</div>
   <div class="device-settings-info" id="deviceSettingsInfo"></div>
 
-  <div style="height:24px"></div>
+  <!-- Telecommande rapide -->
+  <div class="dev-edit-section-label" style="margin-top:20px">Telecommande rapide</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="remote-btn remote-sm" onclick="sendCmdDevice('play_pause')">⏯ Play</button>
+    <button class="remote-btn remote-sm" onclick="sendCmdDevice('select')">OK</button>
+    <button class="remote-btn remote-sm" onclick="sendCmdDevice('menu')">☰ Menu</button>
+    <button class="remote-btn remote-sm" onclick="sendCmdDevice('home')">🏠 Home</button>
+    <button class="remote-btn remote-sm" onclick="sendCmdDevice('up')">▲</button>
+    <button class="remote-btn remote-sm" onclick="sendCmdDevice('down')">▼</button>
+  </div>
+
+  <!-- Strategie par app -->
+  <div class="dev-edit-section-label" style="margin-top:8px">Strategie</div>
+  <div id="deviceStrategyList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px"></div>
+
   <button class="btn btn-primary" onclick="saveDeviceSettings()">Enregistrer les modifications</button>
   <div style="height:32px"></div>
   <div class="dev-edit-danger-zone">
     <div class="dev-edit-section-label" style="color:var(--danger)">Zone de danger</div>
     <button class="dev-edit-delete-btn" onclick="confirmDeleteDevice()">
-      <span>&#x1F5D1;</span> Supprimer cet appareil
+      <span>🗑</span> Supprimer cet appareil
     </button>
   </div>
 </div>
@@ -2392,6 +2452,34 @@ body{
   <button class="btn btn-primary" onclick="saveNotifPrefs()">Enregistrer</button>
 </div>
 
+<!-- Sheet: Aide -->
+<div class="sheet" id="sheet-help">
+  <div class="sheet-bar"></div>
+  <div class="sheet-title">Comment ca marche</div>
+  <div style="display:flex;flex-direction:column;gap:16px;padding-bottom:20px">
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">1️⃣</div>
+      <div><h4 style="font-size:14px;font-weight:700;margin-bottom:4px">Connectez votre appareil</h4><p style="font-size:13px;color:var(--text3);line-height:1.5">Ajoutez votre Apple TV, Chromecast, Fire TV ou Roku depuis le bouton "Ajouter un appareil" sur l'ecran d'accueil.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">2️⃣</div>
+      <div><h4 style="font-size:14px;font-weight:700;margin-bottom:4px">Activez l'automatisation</h4><p style="font-size:13px;color:var(--text3);line-height:1.5">Utilisez le toggle sur la carte de votre appareil, ou programmez un horaire automatique.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">3️⃣</div>
+      <div><h4 style="font-size:14px;font-weight:700;margin-bottom:4px">Profitez de Shabbat</h4><p style="font-size:13px;color:var(--text3);line-height:1.5">ShabbatTV detecte quand la lecture s'arrete (fin d'episode, pub, "etes-vous toujours la?") et la relance automatiquement.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💡</div>
+      <div><h4 style="font-size:14px;font-weight:700;margin-bottom:4px">Fonctionne avec tout</h4><p style="font-size:13px;color:var(--text3);line-height:1.5">Netflix, YouTube, Disney+, Prime Video, Apple TV+, Molotov, MyCanal... Toutes vos apps de streaming sont supportees.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(236,72,153,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📱</div>
+      <div><h4 style="font-size:14px;font-weight:700;margin-bottom:4px">Installez l'app</h4><p style="font-size:13px;color:var(--text3);line-height:1.5">Sur mobile : ouvrez le menu du navigateur et "Ajouter a l'ecran d'accueil". Sur desktop : cliquez l'icone d'installation dans la barre d'adresse.</p></div>
+    </div>
+  </div>
+</div>
+
 <!-- Sheet: Zmanim -->
 <div class="sheet" id="sheet-zmanim">
   <div class="sheet-bar"></div>
@@ -2454,6 +2542,17 @@ body{
 </div>
 
 <style>
+.profile-choice-btn{
+  flex:1;padding:12px;border-radius:var(--radius-xs);border:1.5px solid var(--accent-soft);
+  background:var(--card);cursor:pointer;font-size:14px;font-weight:600;
+  font-family:inherit;transition:all 0.2s var(--spring);color:var(--text);text-align:center;
+}
+.profile-choice-btn:active{transform:scale(0.96)}
+.profile-choice-btn.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+  box-shadow:0 4px 16px rgba(124,58,237,0.3);
+}
+
 .remote-btn{
   width:56px;height:56px;border-radius:50%;border:none;background:var(--card);
   font-size:20px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
@@ -2525,6 +2624,40 @@ function updateProfileSheet(){
   }
   document.getElementById('profileName').textContent=fullName||'Utilisateur';
   document.getElementById('profileEmail').textContent=currentUser.email||'';
+
+  // Tradition buttons
+  document.querySelectorAll('#profileTradition .profile-choice-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.val===(currentUser.tradition||'sephardi'));
+  });
+  // Language buttons
+  document.querySelectorAll('#profileLang .profile-choice-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.val===(currentUser.language||'fr'));
+  });
+  // City
+  document.getElementById('profileCityName').textContent=currentUser.city_name||'Paris';
+}
+
+function setProfileTradition(val){
+  if(!currentUser)return;
+  currentUser.tradition=val;
+  currentUser.havdalah_minutes=val==='sephardi'?72:42;
+  saveUser(currentUser);
+  document.querySelectorAll('#profileTradition .profile-choice-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.val===val);
+  });
+  toast('Tradition mise a jour');
+  loadShabbat();
+}
+
+function setProfileLang(val){
+  if(!currentUser)return;
+  currentUser.language=val;
+  saveUser(currentUser);
+  document.querySelectorAll('#profileLang .profile-choice-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.val===val);
+  });
+  toast('Langue mise a jour');
+  loadHolidays();
 }
 
 function doLogout(){
@@ -2632,7 +2765,13 @@ function showGooglePopup(){
 }
 
 // Init Google when SDK loads
-window.addEventListener('load', () => setTimeout(initGoogleSignIn, 1000));
+window.addEventListener('load', () => {
+  setTimeout(initGoogleSignIn, 1000);
+  // Register service worker for PWA
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+});
 
 /* ═══════════════════════════════════════
    ONBOARDING
@@ -2890,14 +3029,22 @@ async function loadDevices(){
   document.getElementById('deviceList').innerHTML=data.map(d=>{
     const statusClass=d.script_running?'on':(d.error_count>0?'error':'off');
     const statusText=d.script_running?'Tout fonctionne':(d.error_count>0?'Erreur detectee':'Inactif');
+    const connected=d.has_credentials;
+    const connDot=connected?'background:#10b981':'background:#ef4444';
+    const devType=d.device_type||'appletv';
+    const devEmoji=devType==='chromecast'?'📡':devType==='firetv'?'🔥':devType==='roku'?'🟣':'📺';
+    const devLabel=devType==='chromecast'?'Chromecast':devType==='firetv'?'Fire TV':devType==='roku'?'Roku':'Apple TV';
     return`
     <div class="device-card ${d.script_running?'active':''}" id="dev-${d.id}">
       <div class="dev-top">
         <div class="dev-left" onclick="openDeviceSettings(${d.id})" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
-          <div class="dev-avatar"><span>&#x1F4FA;</span></div>
+          <div class="dev-avatar"><span>${devEmoji}</span></div>
           <div>
-            <div class="dev-name">${esc(d.name)}</div>
-            <div class="dev-subtitle">Apple TV &middot; Modifier &#x270E;</div>
+            <div class="dev-name" style="display:flex;align-items:center;gap:6px">
+              ${esc(d.name)}
+              <span style="width:8px;height:8px;border-radius:4px;${connDot};display:inline-block;flex-shrink:0" title="${connected?'Connecte':'Deconnecte'}"></span>
+            </div>
+            <div class="dev-subtitle">${devLabel} &middot; ${d.address} &middot; Modifier &#x270E;</div>
           </div>
         </div>
         <label class="big-toggle">
@@ -3017,20 +3164,74 @@ async function loadStats(){
 /* ── Device settings ── */
 let editingDeviceId=null;
 
+const APP_STRATEGIES=[
+  {key:'generic',emoji:'📺',name:'Generique',desc:'Play + Select (par defaut)'},
+  {key:'netflix',emoji:'🟥',name:'Netflix',desc:'Gere "Etes-vous toujours la?"'},
+  {key:'youtube',emoji:'🔴',name:'YouTube',desc:'Skip pubs, video suivante'},
+  {key:'disney',emoji:'🏰',name:'Disney+',desc:'Episode suivant automatique'},
+  {key:'prime',emoji:'📦',name:'Prime Video',desc:'Dismiss X-Ray, episode suivant'},
+  {key:'appletv',emoji:'🍎',name:'Apple TV+',desc:'Episode suivant'},
+  {key:'molotov',emoji:'📡',name:'Molotov / MyCanal',desc:'Gere les pubs'},
+];
+let deviceStrategy='generic';
+
 function openDeviceSettings(deviceId){
   editingDeviceId=deviceId;
   const d=devices.find(x=>x.id===deviceId);
   if(!d)return;
 
-  document.getElementById('deviceSheetTitle').textContent=d.name;
+  const devType=d.device_type||'appletv';
+  const devEmoji=devType==='chromecast'?'📡':devType==='firetv'?'🔥':devType==='roku'?'🟣':'📺';
+  const devLabel=devType==='chromecast'?'Chromecast':devType==='firetv'?'Fire TV':devType==='roku'?'Roku':'Apple TV';
+
+  document.getElementById('deviceSettingsAvatar').textContent=devEmoji;
   document.getElementById('deviceEditName').value=d.name;
+
+  // Connexion status
+  const connected=d.has_credentials;
+  document.getElementById('deviceConnStatus').innerHTML=`
+    <span style="width:10px;height:10px;border-radius:5px;background:${connected?'#10b981':'#ef4444'}"></span>
+    <span style="font-weight:600;font-size:14px;color:${connected?'#059669':'#ef4444'}">${connected?'Connecte':'Non appaire'}</span>
+    <span style="font-size:12px;color:var(--text3);margin-left:auto">${d.script_running?'Script actif':'Script inactif'}</span>
+  `;
+  document.getElementById('deviceConnStatus').style.background=connected?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.06)';
+
+  // Info
   document.getElementById('deviceSettingsInfo').innerHTML=`
-    <div class="device-info-row"><span>Identifiant</span><span>${esc(d.identifier)}</span></div>
+    <div class="device-info-row"><span>Type</span><span>${devLabel}</span></div>
+    <div class="device-info-row"><span>Identifiant</span><span style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis">${esc(d.identifier)}</span></div>
     <div class="device-info-row"><span>Adresse IP</span><span>${esc(d.address)}</span></div>
     <div class="device-info-row"><span>Protocoles</span><span>${d.has_credentials?'Companion, AirPlay':'Aucun'}</span></div>
-    <div class="device-info-row"><span>Status</span><span>${d.script_running?'Actif':'Inactif'}</span></div>
+    <div class="device-info-row"><span>Relances</span><span>${d.select_count||0}</span></div>
+    <div class="device-info-row"><span>Erreurs</span><span style="color:${d.error_count>0?'var(--danger)':'inherit'}">${d.error_count||0}</span></div>
   `;
+
+  // Strategy list
+  deviceStrategy=d.strategy||'generic';
+  document.getElementById('deviceStrategyList').innerHTML=APP_STRATEGIES.map(s=>`
+    <div onclick="deviceStrategy='${s.key}';openDeviceSettings(${deviceId})"
+      style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius-xs);background:var(--card);cursor:pointer;border:1.5px solid ${deviceStrategy===s.key?'var(--accent)':'transparent'};transition:all 0.2s">
+      <span style="font-size:20px">${s.emoji}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${s.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${s.desc}</div>
+      </div>
+      <div style="width:18px;height:18px;border-radius:9px;border:2px solid ${deviceStrategy===s.key?'var(--accent)':'#c4c1e0'};${deviceStrategy===s.key?'background:var(--accent)':''}"></div>
+    </div>`).join('');
+
   openSheet('device');
+}
+
+function sendCmdDevice(cmd){
+  if(!editingDeviceId){toast('Aucun appareil','info');return;}
+  sendCmdToDevice(editingDeviceId,cmd);
+}
+
+async function sendCmdToDevice(id,cmd){
+  try{
+    await api(`/api/command/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})});
+    if(navigator.vibrate)navigator.vibrate(20);
+  }catch{toast('Erreur commande','error');}
 }
 
 async function saveDeviceSettings(){
@@ -3529,9 +3730,6 @@ async function init(){
   connectWS();
   setInterval(loadDevices,30000);
   setInterval(()=>{loadShabbat();updateHeroBottom()},60000);
-
-  // Start particles
-  initParticles();
 
   // Load zmanim & holidays in background
   loadZmanim();
