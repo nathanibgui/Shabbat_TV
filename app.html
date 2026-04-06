@@ -59,6 +59,7 @@ body{
   min-height:100dvh;
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
+  overflow-x:hidden;
 }
 
 /* ═══ Animated background blobs ═══ */
@@ -1906,8 +1907,22 @@ body{
     <div class="ob-slide" data-slide="5">
       <h2 class="ob-title">Votre ville</h2>
       <p class="ob-desc" style="margin-bottom:24px">Pour calculer les horaires de Shabbat precis.</p>
+
+      <!-- Villes populaires -->
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%;max-width:380px;margin-bottom:16px">
+        <button class="ob-app-chip" onclick="obPickCity(2988507,'Paris','France')">🇫🇷 Paris</button>
+        <button class="ob-app-chip" onclick="obPickCity(2995469,'Marseille','France')">🇫🇷 Marseille</button>
+        <button class="ob-app-chip" onclick="obPickCity(2996944,'Lyon','France')">🇫🇷 Lyon</button>
+        <button class="ob-app-chip" onclick="obPickCity(3031582,'Strasbourg','France')">🇫🇷 Strasbourg</button>
+        <button class="ob-app-chip" onclick="obPickCity(281184,'Jerusalem','Israel')">🇮🇱 Jerusalem</button>
+        <button class="ob-app-chip" onclick="obPickCity(293397,'Tel Aviv','Israel')">🇮🇱 Tel Aviv</button>
+        <button class="ob-app-chip" onclick="obPickCity(5128581,'New York','USA')">🇺🇸 New York</button>
+        <button class="ob-app-chip" onclick="obPickCity(6077243,'Montreal','Canada')">🇨🇦 Montreal</button>
+      </div>
+
+      <!-- Recherche -->
       <div style="position:relative;width:100%;max-width:340px">
-        <input type="text" id="obCitySearch" placeholder="Rechercher une ville..." oninput="obSearchCity(this.value)" autocomplete="off"
+        <input type="text" id="obCitySearch" placeholder="Ou rechercher..." oninput="obSearchCity(this.value)" autocomplete="off"
           style="width:100%;padding:14px 18px;border-radius:var(--radius-sm);border:1.5px solid var(--accent-soft);font-size:15px;font-family:inherit;background:var(--card);color:var(--text);outline:none;transition:border 0.2s">
         <div id="obCityResults" style="position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--card);border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow-lg);z-index:10;display:none"></div>
       </div>
@@ -1915,7 +1930,6 @@ body{
         <span style="font-size:20px">📍</span>
         <span id="obCityName" style="font-weight:700;color:var(--success)">Paris</span>
       </div>
-      <p style="margin-top:12px;font-size:13px;color:var(--text4)">Paris est selectionne par defaut</p>
     </div>
 
     <!-- Step 6: Streaming Apps -->
@@ -1989,6 +2003,7 @@ body{
     <div class="setup-bottom">
       <button class="ob-btn ob-btn-primary" id="setupNext1" onclick="setupGoTo(1)" disabled>Selectionner cet appareil</button>
       <button class="ob-btn ob-btn-ghost" onclick="setupScan()">Rescanner</button>
+      <button class="ob-btn ob-btn-ghost" onclick="setupSkip()" style="color:var(--text3)">Passer cette etape</button>
     </div>
   </div>
 
@@ -2807,6 +2822,7 @@ function setProfileTradition(val){
 }
 
 /* ── Sheet city search ── */
+// City search using JSONP to bypass CORS on Hebcal
 let sheetCityTimer=null;
 function sheetSearchCity(q){
   clearTimeout(sheetCityTimer);
@@ -2814,12 +2830,15 @@ function sheetSearchCity(q){
   const spinner=document.getElementById('sheetCitySpinner');
   if(q.length<2){res.style.display='none';return;}
   spinner.style.display='inline';
-  sheetCityTimer=setTimeout(async()=>{
-    try{
-      const r=await fetch(`https://www.hebcal.com/complete?q=${encodeURIComponent(q)}&limit=8`);
-      const data=await r.json();
-      const cities=(data||[]).filter(i=>i.id&&i.geo==='geoname');
+  sheetCityTimer=setTimeout(()=>{
+    // Use JSONP callback to bypass CORS
+    const cbName='_hebcalCb'+Date.now();
+    window[cbName]=function(data){
       spinner.style.display='none';
+      delete window[cbName];
+      const script=document.getElementById('hebcalScript');
+      if(script)script.remove();
+      const cities=(data||[]).filter(i=>i.id&&i.geo==='geoname');
       if(cities.length===0){res.style.display='none';return;}
       res.innerHTML=cities.map(c=>`
         <div onclick="sheetPickCity(${c.id},'${esc(c.value||c.asciiname)}','${esc(c.country||'')}')"
@@ -2829,8 +2848,13 @@ function sheetSearchCity(q){
           <div style="font-size:12px;color:var(--text3)">${esc(c.admin1||'')}${c.admin1&&c.country?', ':''}${esc(c.country||'')}</div>
         </div>`).join('');
       res.style.display='block';
-    }catch{spinner.style.display='none';res.style.display='none';}
-  },300);
+    };
+    const s=document.createElement('script');
+    s.id='hebcalScript';
+    s.src=`https://www.hebcal.com/complete?q=${encodeURIComponent(q)}&limit=8&callback=${cbName}`;
+    s.onerror=()=>{spinner.style.display='none';res.style.display='none';};
+    document.head.appendChild(s);
+  },400);
 }
 
 function sheetPickCity(geonameid,name,country){
@@ -3097,10 +3121,11 @@ function obSearchCity(q){
   clearTimeout(obCityTimer);
   const res=document.getElementById('obCityResults');
   if(q.length<2){res.style.display='none';return;}
-  obCityTimer=setTimeout(async()=>{
-    try{
-      const r=await fetch(`https://www.hebcal.com/complete?q=${encodeURIComponent(q)}&limit=6`);
-      const data=await r.json();
+  obCityTimer=setTimeout(()=>{
+    const cbName='_obCityCb'+Date.now();
+    window[cbName]=function(data){
+      delete window[cbName];
+      const s2=document.getElementById('obCityScript');if(s2)s2.remove();
       const cities=(data||[]).filter(i=>i.id&&i.geo==='geoname');
       if(cities.length===0){res.style.display='none';return;}
       res.innerHTML=cities.map(c=>`
@@ -3111,8 +3136,13 @@ function obSearchCity(q){
           <div style="font-size:12px;color:var(--text3)">${esc(c.admin1||'')}${c.admin1&&c.country?', ':''}${esc(c.country||'')}</div>
         </div>`).join('');
       res.style.display='block';
-    }catch{res.style.display='none';}
-  },300);
+    };
+    const s=document.createElement('script');
+    s.id='obCityScript';
+    s.src=`https://www.hebcal.com/complete?q=${encodeURIComponent(q)}&limit=6&callback=${cbName}`;
+    s.onerror=()=>res.style.display='none';
+    document.head.appendChild(s);
+  },400);
 }
 
 function obPickCity(geonameid,name,country){
@@ -3909,6 +3939,11 @@ function setupFinish(){
   w.classList.add('hiding');
   setTimeout(()=>w.classList.add('setup-hidden'),500);
   loadDevices();
+}
+
+function setupSkip(){
+  setupFinish();
+  toast('Vous pourrez ajouter un appareil plus tard');
 }
 
 /* ── Notifications settings ── */
