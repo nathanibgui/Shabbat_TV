@@ -1,0 +1,48 @@
+# ============================================================
+# ShabbatTV Hub - Docker Compose
+# ============================================================
+# Base de données : SQLite locale (volume Docker persistant)
+# Aucun cloud, aucun Supabase — 100% local
+# ============================================================
+# Usage:
+#   docker-compose up -d          # Démarrer le Hub
+#   docker-compose down           # Arrêter
+#   docker-compose logs -f        # Logs en direct
+#   docker-compose restart        # Redémarrer
+# ============================================================
+
+version: '3.8'
+
+services:
+  shabbat-hub:
+    build: .
+    container_name: shabbat-hub
+    restart: unless-stopped
+    network_mode: host  # Requis pour la découverte Apple TV (mDNS/Bonjour)
+    volumes:
+      - shabbat-data:/app/data    # Base SQLite persistante
+      - shabbat-logs:/app/logs    # Logs persistants
+    environment:
+      - SHABBAT_PORT=8080
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Paris           # Fuseau horaire (adapter à votre ville)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/devices')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  shabbat-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data   # Dossier local ./data monté dans le conteneur
+  shabbat-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs   # Dossier local ./logs monté dans le conteneur

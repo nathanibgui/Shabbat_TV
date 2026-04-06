@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "ShabbatTV",
+    "slug": "shabbat-tv",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f5f3ff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shabbattv.app",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "ShabbatTV needs to discover Apple TV devices on your network"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f5f3ff"
+      },
+      "package": "com.shabbattv.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "shabbattv",
+    "plugins": [
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#7c3aed"
+        }
+      ],
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser"
+    ]
+  }
+}

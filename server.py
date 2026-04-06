@@ -75,6 +75,18 @@ def init_db():
         havdalah TEXT,
         parasha TEXT
     )""")
+    # Table notification_prefs (stockage local Hub — backup des prefs du téléphone)
+    c.execute("""CREATE TABLE IF NOT EXISTS notification_prefs (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        shabbat_start INTEGER NOT NULL DEFAULT 1,
+        shabbat_end INTEGER NOT NULL DEFAULT 1,
+        candle_reminder INTEGER NOT NULL DEFAULT 1,
+        candle_reminder_minutes INTEGER NOT NULL DEFAULT 18,
+        relaunch_alert INTEGER NOT NULL DEFAULT 1,
+        error_alert INTEGER NOT NULL DEFAULT 1
+    )""")
+    # Seed default prefs if empty
+    c.execute("INSERT OR IGNORE INTO notification_prefs (id) VALUES (1)")
     conn.commit()
     conn.close()
 

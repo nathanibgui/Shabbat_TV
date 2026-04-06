@@ -1,0 +1,74 @@
+name: Build & Deploy ShabbatTV
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/shabbattv
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Create directory if needed
+            mkdir -p /docker/shabbattv
+
+            # Create docker-compose
+            cat > /docker/shabbattv/docker-compose.yml << 'EOF'
+            services:
+              shabbattv:
+                image: ghcr.io/nathanibgui/shabbattv:latest
+                container_name: shabbattv-web
+                restart: unless-stopped
+                labels:
+                  - traefik.enable=true
+                  - "traefik.http.routers.shabbattv.rule=Host(`shabbat.nathanibgui.com`)"
+                  - traefik.http.routers.shabbattv.tls=true
+                  - traefik.http.routers.shabbattv.entrypoints=web,websecure
+                  - traefik.http.routers.shabbattv.tls.certresolver=mytlschallenge
+                  - traefik.http.services.shabbattv.loadbalancer.server.port=80
+                networks:
+                  - n8n_default
+            networks:
+              n8n_default:
+                external: true
+            EOF
+
+            # Pull latest image and restart
+            cd /docker/shabbattv
+            docker compose pull
+            docker compose up -d
+            docker ps | grep shabbattv
+            echo "Deployed: https://shabbat.nathanibgui.com"
