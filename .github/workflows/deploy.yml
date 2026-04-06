@@ -2,7 +2,7 @@ name: Build & Deploy ShabbatTV
 
 on:
   push:
-    branches: [mobile, main]
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
