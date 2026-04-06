@@ -1,22 +1,18 @@
 #!/bin/bash
 # ============================================================
-# ShabbatTV — Deploy to VPS
-# Usage: ./deploy.sh [domain]
-# Example: ./deploy.sh shabbattv.example.com
-#          ./deploy.sh  (uses IP directly)
+# ShabbatTV — Deploy to VPS (uses existing Traefik)
+# Usage: bash deploy.sh
 # ============================================================
 
 set -e
 
 VPS_IP="31.97.199.57"
 VPS_USER="root"
-DOMAIN="${1:-$VPS_IP}"
-REMOTE_DIR="/opt/shabbattv"
+REMOTE_DIR="/docker/shabbattv"
 
 echo "=== ShabbatTV Deploy ==="
 echo "VPS: $VPS_USER@$VPS_IP"
-echo "Domain: $DOMAIN"
-echo "Remote: $REMOTE_DIR"
+echo "URL: https://shabbat.nathanibgui.com"
 echo ""
 
 # 1. Create remote directory
@@ -26,30 +22,22 @@ ssh $VPS_USER@$VPS_IP "mkdir -p $REMOTE_DIR/www"
 # 2. Copy files
 echo "[2/5] Copying files..."
 scp docker-compose.yml $VPS_USER@$VPS_IP:$REMOTE_DIR/
-scp Caddyfile $VPS_USER@$VPS_IP:$REMOTE_DIR/
+scp nginx.conf $VPS_USER@$VPS_IP:$REMOTE_DIR/
 scp ../app.html $VPS_USER@$VPS_IP:$REMOTE_DIR/www/
 
-# 3. Copy manifest.json if exists
-if [ -f "../manifest.json" ]; then
-  scp ../manifest.json $VPS_USER@$VPS_IP:$REMOTE_DIR/www/
-fi
+# 3. Check Traefik network exists
+echo "[3/5] Checking Traefik network..."
+ssh $VPS_USER@$VPS_IP "docker network inspect n8n_default >/dev/null 2>&1 || echo 'WARNING: n8n_default network not found. Traefik must be running.'"
 
-# 4. Set domain and start
-echo "[3/5] Setting domain to: $DOMAIN"
-ssh $VPS_USER@$VPS_IP "cd $REMOTE_DIR && echo 'DOMAIN=$DOMAIN' > .env"
+# 4. Start container
+echo "[4/5] Starting ShabbatTV..."
+ssh $VPS_USER@$VPS_IP "cd $REMOTE_DIR && docker compose up -d"
 
-echo "[4/5] Starting containers..."
-ssh $VPS_USER@$VPS_IP "cd $REMOTE_DIR && docker compose pull && docker compose up -d"
-
-echo "[5/5] Checking health..."
+# 5. Verify
+echo "[5/5] Verifying..."
 sleep 3
-ssh $VPS_USER@$VPS_IP "curl -s -o /dev/null -w '%{http_code}' http://localhost/health || echo 'waiting...'"
+ssh $VPS_USER@$VPS_IP "docker ps | grep shabbattv"
 
 echo ""
 echo "=== Deploy complete ==="
-if [ "$DOMAIN" = "$VPS_IP" ]; then
-  echo "Access: http://$VPS_IP"
-else
-  echo "Access: https://$DOMAIN"
-fi
-echo "Logs: ssh $VPS_USER@$VPS_IP 'cd $REMOTE_DIR && docker compose logs -f'"
+echo "https://shabbat.nathanibgui.com"
