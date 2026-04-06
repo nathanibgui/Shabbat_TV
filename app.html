@@ -910,17 +910,47 @@ body{
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   padding:40px 32px;text-align:center;
-  transition:all 0.5s var(--ease);
-  opacity:0;transform:translateX(80px);
+  transition:all 0.6s var(--spring);
+  opacity:0;transform:translateX(80px) scale(0.95);
   pointer-events:none;
 }
 
 .ob-slide.active{
-  opacity:1;transform:translateX(0);pointer-events:auto;
+  opacity:1;transform:translateX(0) scale(1);pointer-events:auto;
 }
 
+.ob-slide.active .ob-illustration{animation:ob-pop 0.6s var(--spring) 0.2s both}
+.ob-slide.active .ob-title{animation:ob-fade-up 0.5s var(--ease) 0.3s both}
+.ob-slide.active .ob-desc{animation:ob-fade-up 0.5s var(--ease) 0.4s both}
+.ob-slide.active .ob-choice-grid{animation:ob-fade-up 0.5s var(--ease) 0.35s both}
+.ob-slide.active .ob-apps-grid{animation:ob-fade-up 0.5s var(--ease) 0.35s both}
+.ob-slide.active .ob-app-chip{animation:ob-chip-in 0.4s var(--spring) both}
+.ob-slide.active .ob-app-chip:nth-child(1){animation-delay:0.3s}
+.ob-slide.active .ob-app-chip:nth-child(2){animation-delay:0.35s}
+.ob-slide.active .ob-app-chip:nth-child(3){animation-delay:0.4s}
+.ob-slide.active .ob-app-chip:nth-child(4){animation-delay:0.45s}
+.ob-slide.active .ob-app-chip:nth-child(5){animation-delay:0.5s}
+.ob-slide.active .ob-app-chip:nth-child(6){animation-delay:0.55s}
+.ob-slide.active .ob-app-chip:nth-child(7){animation-delay:0.6s}
+.ob-slide.active .ob-app-chip:nth-child(8){animation-delay:0.65s}
+.ob-slide.active input{animation:ob-fade-up 0.5s var(--ease) 0.4s both}
+.ob-slide.active .btn,.ob-slide.active .ob-btn{animation:ob-fade-up 0.5s var(--ease) 0.5s both}
+
 .ob-slide.exit-left{
-  opacity:0;transform:translateX(-80px);
+  opacity:0;transform:translateX(-80px) scale(0.95);
+}
+
+@keyframes ob-pop{
+  from{opacity:0;transform:scale(0.5) rotate(-8deg)}
+  to{opacity:1;transform:scale(1) rotate(0)}
+}
+@keyframes ob-fade-up{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes ob-chip-in{
+  from{opacity:0;transform:scale(0.8) translateY(10px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
 }
 
 .ob-illustration{
