@@ -42,11 +42,11 @@ jobs:
           port: ${{ secrets.VPS_SSH_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Create directory if needed
-            mkdir -p /docker/shabbattv
+            # Deploy to /opt/shabbattv (same location as other apps)
+            mkdir -p /opt/shabbattv
 
             # Create docker-compose
-            cat > /docker/shabbattv/docker-compose.yml << 'EOF'
+            cat > /opt/shabbattv/docker-compose.yml << 'EOF'
             services:
               shabbattv:
                 image: ghcr.io/nathanibgui/shabbattv:latest
@@ -58,8 +58,7 @@ jobs:
                 labels:
                   - traefik.enable=true
                   - "traefik.http.routers.shabbattv.rule=Host(`shabbat.nathanibgui.com`)"
-                  - traefik.http.routers.shabbattv.tls=true
-                  - traefik.http.routers.shabbattv.entrypoints=web,websecure
+                  - traefik.http.routers.shabbattv.entrypoints=websecure
                   - traefik.http.routers.shabbattv.tls.certresolver=mytlschallenge
                   - traefik.http.services.shabbattv.loadbalancer.server.port=80
                 networks:
@@ -72,8 +71,12 @@ jobs:
                 external: true
             EOF
 
+            # Clean old location if exists
+            if [ -d /docker/shabbattv ]; then cd /docker/shabbattv && docker compose down 2>/dev/null; rm -rf /docker/shabbattv; fi
+
             # Pull latest image and restart
-            cd /docker/shabbattv
+            cd /opt/shabbattv
+            docker compose down 2>/dev/null || true
             docker compose pull
             docker compose up -d
             docker ps | grep shabbattv
