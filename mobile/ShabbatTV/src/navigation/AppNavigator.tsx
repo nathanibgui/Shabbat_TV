@@ -19,6 +19,7 @@ import NotificationsScreen from '../screens/settings/NotificationsScreen';
 import SetupWizardScreen from '../screens/setup/SetupWizardScreen';
 import DeviceSettingsScreen from '../screens/home/DeviceSettingsScreen';
 import RemoteControlScreen from '../screens/home/RemoteControlScreen';
+import PlaylistScreen from '../screens/home/PlaylistScreen';
 import CityScreen from '../screens/settings/CityScreen';
 import HelpScreen from '../screens/settings/HelpScreen';
 
@@ -200,6 +201,17 @@ export default function AppNavigator() {
               options={{
                 headerShown: true,
                 title: 'Appareil',
+                headerBackTitle: 'Retour',
+                headerStyle: { backgroundColor: theme.bg },
+                headerTintColor: theme.accent,
+              }}
+            />
+            <Stack.Screen
+              name="Playlist"
+              component={PlaylistScreen}
+              options={{
+                headerShown: true,
+                title: 'Playlist',
                 headerBackTitle: 'Retour',
                 headerStyle: { backgroundColor: theme.bg },
                 headerTintColor: theme.accent,

@@ -330,6 +330,7 @@ export default function HomeScreen({ navigation }: any) {
             { key: 'schedule', nav: 'Schedule', icon: '⏰', iconBg: '#3b82f6', title: 'Programmer', desc: 'Mode automatique' },
             { key: 'stats', nav: 'Stats', icon: '📊', iconBg: '#ec4899', title: 'Statistiques', desc: 'Mes Shabbats' },
             { key: 'city', nav: 'City', icon: '🌍', iconBg: '#f59e0b', title: 'Ma ville', desc: 'Horaires locaux' },
+            { key: 'playlist', nav: 'Playlist', icon: '🎬', iconBg: '#06b6d4', title: 'Playlist', desc: 'Enchainer les apps' },
           ].map((item, i) => (
             <AnimatedCard key={item.key} index={i} delay={700 + i * 80}>
               <PressableScale
