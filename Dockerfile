@@ -38,6 +38,6 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget -q --spider http://127.0.0.1/health || exit 1
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1/')" || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

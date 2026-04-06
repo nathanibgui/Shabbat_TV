@@ -45,39 +45,29 @@ jobs:
             # Deploy to /opt/shabbattv (same location as other apps)
             mkdir -p /opt/shabbattv
 
-            # Create docker-compose
-            cat > /opt/shabbattv/docker-compose.yml << 'EOF'
-            services:
-              shabbattv:
-                image: ghcr.io/nathanibgui/shabbattv:latest
-                container_name: shabbattv-web
-                restart: unless-stopped
-                volumes:
-                  - shabbattv-data:/app/data
-                  - shabbattv-logs:/app/logs
-                labels:
-                  - traefik.enable=true
-                  - "traefik.http.routers.shabbattv.rule=Host(`shabbat.nathanibgui.com`)"
-                  - traefik.http.routers.shabbattv.entrypoints=websecure
-                  - traefik.http.routers.shabbattv.tls.certresolver=mytlschallenge
-                  - traefik.http.services.shabbattv.loadbalancer.server.port=80
-                networks:
-                  - n8n_default
-            volumes:
-              shabbattv-data:
-              shabbattv-logs:
-            networks:
-              n8n_default:
-                external: true
-            EOF
+            # Pull latest image
+            docker pull ghcr.io/nathanibgui/shabbattv:latest
 
-            # Clean old location if exists
-            if [ -d /docker/shabbattv ]; then cd /docker/shabbattv && docker compose down 2>/dev/null; rm -rf /docker/shabbattv; fi
+            # Stop and remove old container
+            docker rm -f shabbattv-web 2>/dev/null || true
 
-            # Pull latest image and restart
-            cd /opt/shabbattv
-            docker compose down 2>/dev/null || true
-            docker compose pull
-            docker compose up -d
+            # Run with correct healthcheck and labels
+            docker run -d --name shabbattv-web --restart unless-stopped \
+              --network n8n_default \
+              -v shabbattv-data:/app/data \
+              -v shabbattv-logs:/app/logs \
+              --health-cmd="python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1/')\"" \
+              --health-interval=30s \
+              --health-timeout=3s \
+              --health-retries=3 \
+              --label "traefik.enable=true" \
+              --label "traefik.http.routers.shabbattv.rule=Host(\`shabbat.nathanibgui.com\`)" \
+              --label "traefik.http.routers.shabbattv.entrypoints=websecure" \
+              --label "traefik.http.routers.shabbattv.tls.certresolver=mytlschallenge" \
+              --label "traefik.http.services.shabbattv.loadbalancer.server.port=80" \
+              ghcr.io/nathanibgui/shabbattv:latest
+
+            # Wait and verify
+            sleep 15
             docker ps | grep shabbattv
             echo "Deployed: https://shabbat.nathanibgui.com"
