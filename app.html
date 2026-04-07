@@ -3049,12 +3049,15 @@ window.addEventListener('load', () => {
    ═══════════════════════════════════════ */
 
 function obGoTo(idx){
+  const prev=obSlide;
   obSlide=idx;
   document.querySelectorAll('.ob-slide').forEach((s,i)=>{
     s.classList.remove('active','exit-left');
     if(i<idx)s.classList.add('exit-left');
     if(i===idx)s.classList.add('active');
   });
+  // Mini confetti on forward navigation
+  if(idx>prev&&idx>0)launchMiniConfetti();
   // Dots
   document.querySelectorAll('#obDots .ob-dot').forEach((d,i)=>{
     d.classList.toggle('active',i===idx);
@@ -3816,6 +3819,21 @@ async function cancelPairing(){
     window._pairSessionId=null;
   }
   skipPairing();
+}
+
+function launchMiniConfetti(){
+  const colors=['#7c3aed','#6366f1','#10b981','#f59e0b','#ec4899','#3b82f6'];
+  for(let i=0;i<15;i++){
+    const p=document.createElement('div');
+    p.style.cssText=`position:fixed;top:40%;left:${30+Math.random()*40}%;width:${5+Math.random()*5}px;height:${5+Math.random()*5}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?'50%':'2px'};z-index:9999;pointer-events:none;opacity:1;transition:all ${0.6+Math.random()*0.8}s ease-out;transform:translate(0,0) scale(1)`;
+    document.body.appendChild(p);
+    requestAnimationFrame(()=>{
+      p.style.transform=`translate(${(Math.random()-0.5)*200}px, ${-100-Math.random()*200}px) scale(0)`;
+      p.style.opacity='0';
+    });
+    setTimeout(()=>p.remove(),1500);
+  }
+  if(navigator.vibrate)navigator.vibrate(30);
 }
 
 function launchConfetti(){

@@ -45,6 +45,18 @@ jobs:
             # Deploy to /opt/shabbattv (same location as other apps)
             mkdir -p /opt/shabbattv
 
+            # Ensure PostgreSQL is running
+            if ! docker ps | grep -q shabbattv-db; then
+              docker run -d --name shabbattv-db --restart unless-stopped \
+                --network n8n_default \
+                -v shabbattv-pgdata:/var/lib/postgresql/data \
+                -e POSTGRES_DB=shabbattv \
+                -e POSTGRES_USER=shabbattv \
+                -e POSTGRES_PASSWORD=shabbattv_secure_2026 \
+                postgres:16-alpine
+              sleep 10
+            fi
+
             # Pull latest image
             docker pull ghcr.io/nathanibgui/shabbattv:latest
 
@@ -56,6 +68,9 @@ jobs:
               --network n8n_default \
               -v shabbattv-data:/app/data \
               -v shabbattv-logs:/app/logs \
+              -e DATABASE_URL="postgresql://shabbattv:shabbattv_secure_2026@shabbattv-db:5432/shabbattv" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e GOOGLE_CLIENT_ID="752558880706-4fh0m4j075f7qjt0d1kqca1c0njr5ndm.apps.googleusercontent.com" \
               --health-cmd="python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1/')\"" \
               --health-interval=30s \
               --health-timeout=3s \
