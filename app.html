@@ -2786,11 +2786,98 @@ async function api(p,o={}){try{const r=await fetch(p,o);return await r.json()}ca
 function getUser(){
   try{return JSON.parse(localStorage.getItem('shabbat_user'))}catch{return null}
 }
+function getToken(){
+  return localStorage.getItem('shabbat_token')||null;
+}
 
-function saveUser(u){
+function saveUser(u,token){
   localStorage.setItem('shabbat_user',JSON.stringify(u));
+  if(token)localStorage.setItem('shabbat_token',token);
   currentUser=u;
   updateAvatar();
+}
+
+// API v2 helper with JWT auth
+async function apiv2(path,opts={}){
+  const token=getToken();
+  const headers={'Content-Type':'application/json',...(opts.headers||{})};
+  if(token)headers['Authorization']='Bearer '+token;
+  try{
+    const r=await fetch('/api/v2'+path,{...opts,headers});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||'Erreur');
+    return data;
+  }catch(e){console.error('API v2:',e);return null;}
+}
+
+// Register via API v2
+async function apiRegister(email,firstName,lastName,password){
+  const data=await apiv2('/auth/register',{
+    method:'POST',
+    body:JSON.stringify({email,first_name:firstName,last_name:lastName,password:password||email,tradition:'sephardi',language:'fr'}),
+  });
+  if(data&&data.token){
+    saveUser({
+      firstName:data.user.first_name,lastName:data.user.last_name,
+      email:data.user.email,picture:data.user.avatar_url||'',
+      provider:'email',gender:data.user.gender,
+      tradition:data.user.tradition,city_name:data.user.city_name,
+      geonameid:data.user.geonameid,language:data.user.language,
+      streaming_apps:data.user.streaming_apps||[],
+      id:data.user.id,
+    },data.token);
+    return true;
+  }
+  return false;
+}
+
+// Login via API v2
+async function apiLogin(email,password){
+  const data=await apiv2('/auth/login',{
+    method:'POST',
+    body:JSON.stringify({email,password}),
+  });
+  if(data&&data.token){
+    saveUser({
+      firstName:data.user.first_name,lastName:data.user.last_name,
+      email:data.user.email,picture:data.user.avatar_url||'',
+      provider:'email',gender:data.user.gender,
+      tradition:data.user.tradition,city_name:data.user.city_name,
+      geonameid:data.user.geonameid,language:data.user.language,
+      streaming_apps:data.user.streaming_apps||[],
+      id:data.user.id,
+    },data.token);
+    return true;
+  }
+  return false;
+}
+
+// Google auth via API v2
+async function apiGoogleAuth(googleToken){
+  const data=await apiv2('/auth/google',{
+    method:'POST',
+    body:JSON.stringify({token:googleToken}),
+  });
+  if(data&&data.token){
+    saveUser({
+      firstName:data.user.first_name,lastName:data.user.last_name,
+      email:data.user.email,picture:data.user.avatar_url||'',
+      provider:'google',gender:data.user.gender,
+      tradition:data.user.tradition,city_name:data.user.city_name,
+      geonameid:data.user.geonameid,language:data.user.language,
+      streaming_apps:data.user.streaming_apps||[],
+      googleId:data.user.google_id,
+      id:data.user.id,
+    },data.token);
+    return true;
+  }
+  return false;
+}
+
+// Update profile via API v2
+async function apiUpdateProfile(updates){
+  const data=await apiv2('/auth/me',{method:'PUT',body:JSON.stringify(updates)});
+  return data;
 }
 
 function updateAvatar(){
@@ -2845,7 +2932,7 @@ function setProfileTradition(val){
   currentUser.tradition=val;
   currentUser.havdalah_minutes=val==='sephardi'?72:42;
   saveUser(currentUser);
-  // Update all tradition buttons (sheet + page)
+  apiUpdateProfile({tradition:val,havdalah_minutes:val==='sephardi'?72:42});
   document.querySelectorAll('.profile-choice-btn[data-val="sephardi"],.profile-choice-btn[data-val="ashkenazi"]').forEach(b=>{
     b.classList.toggle('active',b.dataset.val===val);
   });
@@ -2858,7 +2945,7 @@ function setProfileLang(val){
   if(!currentUser)return;
   currentUser.language=val;
   saveUser(currentUser);
-  // Update all lang buttons
+  apiUpdateProfile({language:val});
   document.querySelectorAll('.profile-choice-btn[data-val="fr"],.profile-choice-btn[data-val="en"],.profile-choice-btn[data-val="he"]').forEach(b=>{
     b.classList.toggle('active',b.dataset.val===val);
   });
@@ -2911,12 +2998,11 @@ function sheetPickCity(geonameid,name,country){
     currentUser.geonameid=geonameid;
     currentUser.city_name=name;
     saveUser(currentUser);
+    apiUpdateProfile({geonameid,city_name:name});
   }
-  // Update profile page city
   const el=document.getElementById('profilePageCityName');
   if(el)el.textContent=name;
   toast('Ville changee : '+name+', '+country);
-  // Reload shabbat times with new city
   loadShabbat();
   closeSheet();
 }
@@ -2933,9 +3019,12 @@ function saveHubIp(){
 
 function doLogout(){
   localStorage.removeItem('shabbat_user');
+  localStorage.removeItem('shabbat_token');
+  localStorage.removeItem('shabbat_setup_done');
   currentUser=null;
   closeSheet();
-  // Show onboarding again
+  document.getElementById('tabBar').style.display='none';
+  switchTab('home');
   const ob=document.getElementById('onboarding');
   ob.classList.remove('onboarding-hidden','hiding');
   obSlide=0;
@@ -2961,23 +3050,21 @@ function initGoogleSignIn(){
 }
 
 function handleGoogleResponse(response){
-  // Decode JWT token from Google
-  const payload = parseJwt(response.credential);
-  if(!payload) { toast('Erreur de connexion Google'); return; }
-
-  const user = {
-    firstName: payload.given_name || '',
-    lastName: payload.family_name || '',
-    email: payload.email || '',
-    picture: payload.picture || '',
-    provider: 'google',
-    gender: null,
-    googleId: payload.sub,
-  };
-
-  saveUser(user);
-  document.getElementById('obUserName').textContent = user.firstName + ' !';
-  obGoTo(3);
+  // Send Google credential to backend API v2
+  apiGoogleAuth(response.credential).then(ok=>{
+    if(!ok){
+      // Fallback: decode locally
+      const payload=parseJwt(response.credential);
+      if(!payload){toast('Erreur de connexion Google');return;}
+      saveUser({
+        firstName:payload.given_name||'',lastName:payload.family_name||'',
+        email:payload.email||'',picture:payload.picture||'',
+        provider:'google',gender:null,googleId:payload.sub,
+      });
+    }
+    document.getElementById('obUserName').textContent=(currentUser.firstName||'')+ ' !';
+    obGoTo(3);
+  });
 }
 
 function parseJwt(token){
@@ -3130,14 +3217,23 @@ function obEmailContinue(){
     return;
   }
 
-  saveUser({
-    firstName, lastName, email,
-    picture:'', provider:'email', gender:null,
+  // Register via API v2
+  apiRegister(email,firstName,lastName,email).then(ok=>{
+    if(!ok){
+      // Fallback: try login if already registered
+      apiLogin(email,email).then(ok2=>{
+        if(!ok2){
+          // Fallback: local only
+          saveUser({firstName,lastName,email,picture:'',provider:'email',gender:null});
+        }
+        document.getElementById('obUserName').textContent=firstName+' !';
+        obGoTo(3);
+      });
+    }else{
+      document.getElementById('obUserName').textContent=firstName+' !';
+      obGoTo(3);
+    }
   });
-
-  // Go to personalization
-  document.getElementById('obUserName').textContent=firstName+' !';
-  obGoTo(3);
 }
 
 function obSelectGender(el,val){
@@ -4041,8 +4137,23 @@ async function init(){
   currentUser=getUser();
   const tabBar=document.getElementById('tabBar');
 
+  // If we have a token, verify it and refresh user data from server
+  if(currentUser&&getToken()){
+    const me=await apiv2('/auth/me');
+    if(me&&me.user){
+      saveUser({
+        ...currentUser,
+        firstName:me.user.first_name,lastName:me.user.last_name,
+        email:me.user.email,picture:me.user.avatar_url||currentUser.picture||'',
+        tradition:me.user.tradition,city_name:me.user.city_name,
+        geonameid:me.user.geonameid,language:me.user.language,
+        streaming_apps:me.user.streaming_apps||[],
+        id:me.user.id,
+      });
+    }
+  }
+
   if(!currentUser){
-    // First launch — hide tab bar, show onboarding
     tabBar.style.display='none';
     const ob=document.getElementById('onboarding');
     ob.classList.remove('onboarding-hidden');
@@ -4051,7 +4162,6 @@ async function init(){
     tabBar.style.display='flex';
     updateAvatar();
     updateProfileSheet();
-    // Check if setup is done
     if(!localStorage.getItem('shabbat_setup_done')){
       showSetup();
     }
