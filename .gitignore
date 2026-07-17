@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 *.db
+hub_config.json
 logs/
 _archive/
 .claude/

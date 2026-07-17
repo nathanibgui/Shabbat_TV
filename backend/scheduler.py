@@ -7,7 +7,8 @@ import json
 import urllib.request
 from datetime import datetime, timedelta
 from db import get_conn
-from ws_manager import send_command_to_user, is_user_connected
+from ws_manager import (send_to_hubs, send_to_remotes, broadcast_to_user,
+                        is_user_connected, is_hub_connected)
 
 
 async def run_scheduler():
@@ -57,32 +58,52 @@ async def check_schedules():
                 havdalah = parse_iso(shabbat_times.get('havdalah'))
 
                 if candle and havdalah:
-                    # 1h before — prepare notification
+                    # 1h before — prepare notification (tous les clients)
                     if candle - timedelta(hours=1) <= now <= candle - timedelta(minutes=59):
-                        await send_command_to_user(user_id, {
+                        await broadcast_to_user(user_id, {
                             'type': 'notification',
                             'message': 'Shabbat dans 1 heure !',
                             'shabbat_times': shabbat_times,
                         })
+                        # Alerte si aucun hub n'est en ligne a H-1
+                        if not is_hub_connected(user_id):
+                            await send_to_remotes(user_id, {
+                                'type': 'hub_offline_alert',
+                                'message': "Shabbat dans 1h mais aucun hub "
+                                           "n'est connecte ! Lancez l'agent.",
+                            })
 
-                    # Shabbat started — activate
+                    # Shabbat started — activate (ordre aux hubs)
                     if candle <= now <= candle + timedelta(minutes=1):
-                        await send_command_to_user(user_id, {
+                        sent = await send_to_hubs(user_id, {
                             'type': 'start',
                             'mode': 'shabbat',
                             'message': 'Shabbat Shalom ! Mode Shabbat active.',
+                            'shabbat_times': shabbat_times,
+                        })
+                        await send_to_remotes(user_id, {
+                            'type': 'notification',
+                            'message': 'Shabbat Shalom ! Mode Shabbat active.'
+                                       if sent else
+                                       'Shabbat commence mais aucun hub connecte !',
                         })
                         # Log event
                         async with pool.acquire() as conn:
                             await conn.execute(
-                                "INSERT INTO events (user_id, type, message) VALUES ($1, 'shabbat', 'Mode Shabbat active automatiquement')",
-                                user_id
+                                "INSERT INTO events (user_id, type, message) VALUES ($1, 'shabbat', $2)",
+                                user_id,
+                                'Mode Shabbat active automatiquement' if sent
+                                else 'Shabbat commence — AUCUN HUB CONNECTE'
                             )
 
                     # Shabbat ended — deactivate
                     if havdalah <= now <= havdalah + timedelta(minutes=1):
-                        await send_command_to_user(user_id, {
+                        await send_to_hubs(user_id, {
                             'type': 'stop',
+                            'message': 'Shabbat termine. Shavua Tov !',
+                        })
+                        await send_to_remotes(user_id, {
+                            'type': 'notification',
                             'message': 'Shabbat termine. Shavua Tov !',
                         })
                         async with pool.acquire() as conn:
@@ -111,7 +132,7 @@ async def check_schedules():
 
                     # Start time reached
                     if start and abs_time_diff(current_time, start) < 60:
-                        await send_command_to_user(user_id, {
+                        await send_to_hubs(user_id, {
                             'type': 'start',
                             'mode': 'scheduled',
                             'message': f'Programme demarre ({start})',
@@ -119,7 +140,7 @@ async def check_schedules():
 
                     # End time reached
                     if end and sched['auto_off'] and abs_time_diff(current_time, end) < 60:
-                        await send_command_to_user(user_id, {
+                        await send_to_hubs(user_id, {
                             'type': 'stop',
                             'message': f'Programme termine ({end})',
                         })

@@ -146,8 +146,38 @@ D:\Dev\Shabbat\
 - [x] Notifications granulaires (5 types)
 - [x] Confettis, animations, vibrations haptic
 
+## Hub Agent (nouveau)
+
+`hub_agent.py` : agent portable qui remplace le "PC allume avec server.py".
+Connexion WebSocket SORTANTE vers le VPS (aucune config box), recoit les
+ordres du scheduler cloud (start/stop/command) et pilote les TV en local
+via pyatv. Meme modele que SmartThings : le cloud coordonne, le local execute.
+
+```bash
+python hub_agent.py --login EMAIL   # une fois : login VPS, sauvegarde le token
+python hub_agent.py                 # demarre l'agent (a l'infini, reconnexion auto)
+python hub_agent.py --devices       # liste les appareils appaires localement
+```
+
+- **Multi-appareils** : Apple TV (event-driven via `ShabbatController`),
+  Chromecast / Android TV / Fire TV / Roku (polling via `universal_monitor.py`
+  + `controllers/`). Colonne `devices.type` (migration auto).
+- **Scan reseau universel** : message `scan` -> `scan_all_devices()` balaye
+  toutes les plateformes en parallele -> `scan_result` vers l'app.
+- Roles WebSocket cote VPS (`backend/ws_manager.py`) : `hub` (execute) vs
+  `remote` (web/mobile, pilote). Routage remote->hub (command, start, stop,
+  status_request, scan) et hub->remote (hub_status, event, command_result,
+  scan_result).
+- Le scheduler (`backend/scheduler.py`) envoie start/stop aux hubs avec les
+  horaires Hebcal ; alerte `hub_offline_alert` si aucun hub a H-1.
+- Si le VPS coupe pendant Shabbat, le monitoring local CONTINUE (le cloud
+  n'est qu'un coordinateur).
+- Portable : PC aujourd'hui, app Android via Chaquopy (`run_embedded()`),
+  Raspberry Pi demain. Token JWT dans `hub_config.json` (gitignore).
+
 ## Ce qui reste a faire
 
+- [ ] Foreground Service Android embarquant hub_agent.py (Chaquopy)
 - [ ] Backend auth reel (JWT, sessions) au lieu de localStorage
 - [ ] Choix de la ville (geonameid Hebcal)
 - [ ] Strategies par app (Netflix "still watching?", etc.)
