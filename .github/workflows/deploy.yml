@@ -42,8 +42,15 @@ jobs:
           port: ${{ secrets.VPS_SSH_PORT }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            # Fail on any error (avant : un pull rate relançait la vieille image)
+            set -e
+
             # Deploy to /opt/shabbattv (same location as other apps)
             mkdir -p /opt/shabbattv
+
+            # Login GHCR avec le token du run (le paquet est prive)
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io \
+              -u "${{ github.actor }}" --password-stdin
 
             # Ensure PostgreSQL is running
             if ! docker ps | grep -q shabbattv-db; then
@@ -59,6 +66,7 @@ jobs:
 
             # Pull latest image
             docker pull ghcr.io/nathanibgui/shabbattv:latest
+            docker logout ghcr.io
 
             # Stop and remove old container
             docker rm -f shabbattv-web 2>/dev/null || true
